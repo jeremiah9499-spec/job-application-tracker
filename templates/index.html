@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+    <title>Job Tracker</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+
+    <div class="container">
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+
+    {% if messages %}
+
+        <div class="flash-container">
+
+            {% for category, message in messages %}
+
+                <div class="flash-message flash-{{ category }}">
+                    {{ message }}
+                </div>
+
+            {% endfor %}
+
+        </div>
+
+    {% endif %}
+
+{% endwith %}
+
+        <h1>Job Application Tracker</h1>
+
+        <p class="subtitle">
+            Keep track of your job applications in one place.
+        </p>
+
+        <!-- DASHBOARD STATS -->
+        <div class="stats">
+
+            <div class="stat-card">
+                <p>Total Applications</p>
+                <h2>{{ total }}</h2>
+            </div>
+
+            <div class="stat-card">
+                <p>Applied</p>
+                <h2>{{ applied }}</h2>
+            </div>
+
+            <div class="stat-card">
+                <p>Interviews</p>
+                <h2>{{ interviews }}</h2>
+            </div>
+
+            <div class="stat-card">
+                <p>Offers</p>
+                <h2>{{ offers }}</h2>
+            </div>
+
+        </div>
+
+
+        <!-- ADD APPLICATION BUTTON -->
+        <a href="{{ url_for('add_job') }}" class="btn">
+            + Add Application
+        </a>
+
+
+        <!-- SAVED APPLICATIONS -->
+        <div class="card">
+
+            <h2>Saved Applications</h2>
+
+
+            <!-- SEARCH -->
+            <input
+                type="text"
+                id="searchInput"
+                placeholder="Search by company or job title..."
+            >
+
+
+            <!-- STATUS FILTER -->
+            <select id="statusFilter">
+
+                <option value="all">
+                    All Statuses
+                </option>
+
+                <option value="applied">
+                    Applied
+                </option>
+
+                <option value="interview">
+                    Interview
+                </option>
+
+                <option value="offered">
+                    Offered
+                </option>
+
+                <option value="rejected">
+                    Rejected
+                </option>
+
+            </select>
+
+
+            <!-- APPLICATION TABLE -->
+            <table id="applicationsTable">
+
+                <thead>
+
+                    <tr>
+                        <th onclick="sortTable(0)">
+                            Company ↕
+                        </th>
+
+                        <th onclick="sortTable(1)">
+                            Job Title ↕
+                        </th>
+
+                        <th onclick="sortTable(2)">
+                            Status ↕
+                        </th>
+
+                        <th onclick="sortTable(3)">
+                            Date Applied ↕
+                        </th>
+
+                        <th onclick="sortTable(4)">
+                            Days Waiting ↕
+                        </th>
+
+                        <th>
+                            Actions
+                        </th>
+                    </tr>
+
+                </thead>
+
+
+                <tbody id="applicationsBody">
+
+                    {% for application in applications %}
+
+                    <tr>
+
+                        <!-- COMPANY -->
+                        <td>
+                            {{ application[1] }}
+                        </td>
+
+
+                        <!-- JOB TITLE -->
+                        <td>
+                            {{ application[2] }}
+                        </td>
+
+
+                        <!-- STATUS -->
+                        <td>
+
+                            <span
+                                class="status status-{{ application[3]|lower }}"
+                            >
+                                {{ application[3] }}
+                            </span>
+
+                        </td>
+
+
+                        <!-- DATE APPLIED -->
+                        <td>
+                            {{ application[4] }}
+                        </td>
+
+
+                        <!-- DAYS WAITING + FOLLOW UP -->
+                        <td>
+
+                            {% if application[5] > 7 and application[3] == "Applied" %}
+
+                                <span class="follow-up">
+                                    {{ application[5] }} days — Follow Up
+                                </span>
+
+                                <br><br>
+
+                                <!-- SMS REMINDER BUTTON -->
+                                <a
+                                    href="{{ url_for('remind_job', id=application[0]) }}"
+                                    class="reminder-btn"
+                                    onclick="return confirm('Send yourself a follow-up SMS reminder for this application?')"
+                                >
+                                    📱 Send Reminder
+                                </a>
+
+                            {% else %}
+
+                                {{ application[5] }} days
+
+                            {% endif %}
+
+                        </td>
+
+
+                        <!-- ACTIONS -->
+                        <td>
+
+                            <a
+                                href="{{ url_for('edit_job', id=application[0]) }}"
+                                class="btn edit-btn"
+                            >
+                                Edit
+                            </a>
+
+
+                            <a
+                                href="{{ url_for('delete_job', id=application[0]) }}"
+                                class="btn delete-btn"
+                                onclick="return confirm('Are you sure you want to delete this application?')"
+                            >
+                                Delete
+                            </a>
+
+                        </td>
+
+                    </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+
+    <!-- JAVASCRIPT -->
+    <script>
+
+        const searchInput =
+            document.getElementById("searchInput");
+
+        const statusFilter =
+            document.getElementById("statusFilter");
+
+        const tableBody =
+            document.getElementById("applicationsBody");
+
+
+        /* -------------------------
+           SEARCH + FILTER
+        ------------------------- */
+
+        function filterApplications() {
+
+            const searchText =
+                searchInput.value.toLowerCase();
+
+            const selectedStatus =
+                statusFilter.value.toLowerCase();
+
+            const rows =
+                tableBody.querySelectorAll("tr");
+
+
+            rows.forEach(function(row) {
+
+                const rowText =
+                    row.textContent.toLowerCase();
+
+
+                const statusElement =
+                    row.querySelector(".status");
+
+
+                let rowStatus = "";
+
+
+                if (statusElement) {
+
+                    rowStatus =
+                        statusElement
+                            .textContent
+                            .trim()
+                            .toLowerCase();
+
+                }
+
+
+                const matchesSearch =
+                    rowText.includes(searchText);
+
+
+                const matchesStatus =
+                    selectedStatus === "all" ||
+                    rowStatus === selectedStatus;
+
+
+                if (
+                    matchesSearch &&
+                    matchesStatus
+                ) {
+
+                    row.style.display = "";
+
+                } else {
+
+                    row.style.display = "none";
+
+                }
+
+            });
+
+        }
+
+
+        searchInput.addEventListener(
+            "keyup",
+            filterApplications
+        );
+
+
+        statusFilter.addEventListener(
+            "change",
+            filterApplications
+        );
+
+
+        /* -------------------------
+           TABLE SORTING
+        ------------------------- */
+
+        let sortDirections = {};
+
+
+        function sortTable(columnIndex) {
+
+            const rows =
+                Array.from(
+                    tableBody.querySelectorAll("tr")
+                );
+
+
+            sortDirections[columnIndex] =
+                !sortDirections[columnIndex];
+
+
+            const ascending =
+                sortDirections[columnIndex];
+
+
+            rows.sort(function(rowA, rowB) {
+
+                const valueA =
+                    rowA.cells[columnIndex]
+                        .textContent
+                        .trim()
+                        .toLowerCase();
+
+
+                const valueB =
+                    rowB.cells[columnIndex]
+                        .textContent
+                        .trim()
+                        .toLowerCase();
+
+
+                if (valueA < valueB) {
+                    return ascending ? -1 : 1;
+                }
+
+
+                if (valueA > valueB) {
+                    return ascending ? 1 : -1;
+                }
+
+
+                return 0;
+
+            });
+
+
+            rows.forEach(function(row) {
+
+                tableBody.appendChild(row);
+
+            });
+
+        }
+
+    </script>
+
+</body>
+</html>
