@@ -6,17 +6,19 @@ from flask import (
     url_for,
     flash
 )
-from datetime import datetime
+from datetime import datetime, date
 from twilio.rest import Client
-import sqlite3
+import psycopg
 import os
 
 
 app = Flask(__name__)
 
-# Flask needs a secret key to use flash messages.
-# For local development, this fallback is okay.
-# Later, before deployment, we'll move this into an environment variable.
+
+# -------------------------
+# FLASK SECRET KEY
+# -------------------------
+
 app.secret_key = os.environ.get(
     "FLASK_SECRET_KEY",
     "development-secret-key"
@@ -24,15 +26,31 @@ app.secret_key = os.environ.get(
 
 
 # -------------------------
+# DATABASE CONNECTION
+# -------------------------
+
+def get_db_connection():
+    database_url = os.environ["DATABASE_URL"]
+
+    connection = psycopg.connect(
+        database_url
+    )
+
+    return connection
+
+
+# -------------------------
 # DATABASE SETUP
 # -------------------------
 
 def init_db():
-    connection = sqlite3.connect("jobs.db")
+    connection = get_db_connection()
 
-    connection.execute("""
+    cursor = connection.cursor()
+
+    cursor.execute("""
         CREATE TABLE IF NOT EXISTS applications (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            id SERIAL PRIMARY KEY,
             company_name TEXT NOT NULL,
             job_title TEXT NOT NULL,
             status TEXT NOT NULL,
@@ -41,6 +59,8 @@ def init_db():
     """)
 
     connection.commit()
+
+    cursor.close()
     connection.close()
 
 
@@ -66,7 +86,7 @@ def send_sms_reminder():
     return message.sid
 
 
-# Make sure database exists
+# Make sure database table exists
 init_db()
 
 
@@ -76,48 +96,90 @@ init_db()
 
 @app.route("/")
 def home():
-    connection = sqlite3.connect("jobs.db")
+    connection = get_db_connection()
 
-    applications = connection.execute(
-        "SELECT * FROM applications"
-    ).fetchall()
+    cursor = connection.cursor()
 
-    total = connection.execute(
+    cursor.execute(
+        "SELECT * FROM applications ORDER BY id DESC"
+    )
+
+    applications = cursor.fetchall()
+
+
+    cursor.execute(
         "SELECT COUNT(*) FROM applications"
-    ).fetchone()[0]
+    )
 
-    applied = connection.execute(
-        "SELECT COUNT(*) FROM applications WHERE status = ?",
+    total = cursor.fetchone()[0]
+
+
+    cursor.execute(
+        """
+        SELECT COUNT(*)
+        FROM applications
+        WHERE status = %s
+        """,
         ("Applied",)
-    ).fetchone()[0]
+    )
 
-    interviews = connection.execute(
-        "SELECT COUNT(*) FROM applications WHERE status = ?",
+    applied = cursor.fetchone()[0]
+
+
+    cursor.execute(
+        """
+        SELECT COUNT(*)
+        FROM applications
+        WHERE status = %s
+        """,
         ("Interview",)
-    ).fetchone()[0]
+    )
 
-    offers = connection.execute(
-        "SELECT COUNT(*) FROM applications WHERE status = ?",
+    interviews = cursor.fetchone()[0]
+
+
+    cursor.execute(
+        """
+        SELECT COUNT(*)
+        FROM applications
+        WHERE status = %s
+        """,
         ("Offered",)
-    ).fetchone()[0]
+    )
 
+    offers = cursor.fetchone()[0]
+
+
+    cursor.close()
     connection.close()
+
+
+    # -------------------------
+    # CALCULATE DAYS WAITING
+    # -------------------------
 
     applications_with_days = []
 
     for application in applications:
-        date_applied = datetime.strptime(
-            application[4],
-            "%Y-%m-%d"
-        )
+
+        date_applied = application[4]
+
+        # PostgreSQL returns DATE values
+        # as real Python date objects.
+        if isinstance(date_applied, str):
+            date_applied = datetime.strptime(
+                date_applied,
+                "%Y-%m-%d"
+            ).date()
 
         days_since = (
-            datetime.now() - date_applied
+            date.today() - date_applied
         ).days
 
         applications_with_days.append(
             application + (days_since,)
         )
+
 
     return render_template(
         "index.html",
@@ -137,14 +199,22 @@ def home():
 def add_job():
 
     if request.method == "POST":
+
         company = request.form["company_name"]
+
         job_title = request.form["job_title"]
+
         status = request.form["status"]
+
         date_applied = request.form["date_applied"]
 
-        connection = sqlite3.connect("jobs.db")
 
-        connection.execute(
+        connection = get_db_connection()
+
+        cursor = connection.cursor()
+
+
+        cursor.execute(
             """
             INSERT INTO applications (
                 company_name,
@@ -152,7 +222,7 @@ def add_job():
                 status,
                 date_applied
             )
-            VALUES (?, ?, ?, ?)
+            VALUES (%s, %s, %s, %s)
             """,
             (
                 company,
@@ -162,17 +232,23 @@ def add_job():
             )
         )
 
+
         connection.commit()
+
+        cursor.close()
         connection.close()
+
 
         flash(
             "Application added successfully!",
             "success"
         )
 
+
         return redirect(
             url_for("home")
         )
+
 
     return render_template(
         "add_job.html"
@@ -185,20 +261,32 @@ def add_job():
 
 @app.route("/delete/<int:id>")
 def delete_job(id):
-    connection = sqlite3.connect("jobs.db")
 
-    connection.execute(
-        "DELETE FROM applications WHERE id = ?",
+    connection = get_db_connection()
+
+    cursor = connection.cursor()
+
+
+    cursor.execute(
+        """
+        DELETE FROM applications
+        WHERE id = %s
+        """,
         (id,)
     )
 
+
     connection.commit()
+
+    cursor.close()
     connection.close()
+
 
     flash(
         "Application deleted.",
         "success"
     )
+
 
     return redirect(
         url_for("home")
@@ -209,24 +297,36 @@ def delete_job(id):
 # EDIT APPLICATION
 # -------------------------
 
-@app.route("/edit/<int:id>", methods=["GET", "POST"])
+@app.route(
+    "/edit/<int:id>",
+    methods=["GET", "POST"]
+)
 def edit_job(id):
-    connection = sqlite3.connect("jobs.db")
+
+    connection = get_db_connection()
+
+    cursor = connection.cursor()
+
 
     if request.method == "POST":
+
         company = request.form["company_name"]
+
         job_title = request.form["job_title"]
+
         status = request.form["status"]
+
         date_applied = request.form["date_applied"]
 
-        connection.execute(
+
+        cursor.execute(
             """
             UPDATE applications
-            SET company_name = ?,
-                job_title = ?,
-                status = ?,
-                date_applied = ?
-            WHERE id = ?
+            SET company_name = %s,
+                job_title = %s,
+                status = %s,
+                date_applied = %s
+            WHERE id = %s
             """,
             (
                 company,
@@ -237,24 +337,51 @@ def edit_job(id):
             )
         )
 
+
         connection.commit()
+
+        cursor.close()
         connection.close()
+
 
         flash(
             "Application updated successfully!",
             "success"
         )
 
+
         return redirect(
             url_for("home")
         )
 
-    application = connection.execute(
-        "SELECT * FROM applications WHERE id = ?",
-        (id,)
-    ).fetchone()
 
+    cursor.execute(
+        """
+        SELECT * FROM applications
+        WHERE id = %s
+        """,
+        (id,)
+    )
+
+
+    application = cursor.fetchone()
+
+
+    cursor.close()
     connection.close()
+
+
+    if not application:
+
+        flash(
+            "Application could not be found.",
+            "error"
+        )
+
+        return redirect(
+            url_for("home")
+        )
+
 
     return render_template(
         "edit_job.html",
@@ -268,16 +395,30 @@ def edit_job(id):
 
 @app.route("/remind/<int:id>")
 def remind_job(id):
-    connection = sqlite3.connect("jobs.db")
 
-    application = connection.execute(
-        "SELECT * FROM applications WHERE id = ?",
+    connection = get_db_connection()
+
+    cursor = connection.cursor()
+
+
+    cursor.execute(
+        """
+        SELECT * FROM applications
+        WHERE id = %s
+        """,
         (id,)
-    ).fetchone()
+    )
 
+
+    application = cursor.fetchone()
+
+
+    cursor.close()
     connection.close()
 
+
     if not application:
+
         flash(
             "Application could not be found.",
             "error"
@@ -287,7 +428,9 @@ def remind_job(id):
             url_for("home")
         )
 
+
     try:
+
         send_sms_reminder()
 
         flash(
@@ -295,13 +438,19 @@ def remind_job(id):
             "success"
         )
 
+
     except Exception as error:
-        print("Twilio error:", error)
+
+        print(
+            "Twilio error:",
+            error
+        )
 
         flash(
             "SMS reminder could not be sent.",
             "error"
         )
+
 
     return redirect(
         url_for("home")
