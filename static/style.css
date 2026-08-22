@@ -1212,3 +1212,129 @@ th[onclick]:hover {
     }
 
 }
+
+/* =================================================
+   ACCOUNT SETTINGS
+================================================= */
+
+.account-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+
+.settings-btn {
+    display: inline-block;
+
+    padding: 9px 15px;
+
+    border-radius: 8px;
+
+    background: rgba(59, 130, 246, 0.14);
+
+    border: 1px solid rgba(96, 165, 250, 0.25);
+
+    color: #93c5fd;
+
+    text-decoration: none;
+
+    font-size: 14px;
+    font-weight: bold;
+
+    transition: 0.2s;
+}
+
+
+.settings-btn:hover {
+    background: rgba(59, 130, 246, 0.24);
+
+    color: white;
+
+    transform: translateY(-1px);
+}
+
+
+.settings-section {
+    margin-bottom: 28px;
+}
+
+
+.settings-section label {
+    display: block;
+
+    margin-bottom: 8px;
+
+    color: #dbeafe;
+
+    font-weight: bold;
+}
+
+
+.settings-email {
+    padding: 13px 14px;
+
+    border: 1px solid rgba(255, 255, 255, 0.12);
+
+    border-radius: 9px;
+
+    background: rgba(255, 255, 255, 0.05);
+
+    color: #cbd5e1;
+}
+
+
+.settings-help {
+    margin-top: 8px;
+
+    color: #94a3b8;
+
+    font-size: 13px;
+}
+
+
+.settings-note {
+    margin-top: 30px;
+
+    padding: 16px;
+
+    border: 1px solid rgba(245, 158, 11, 0.25);
+
+    border-radius: 10px;
+
+    background: rgba(245, 158, 11, 0.08);
+
+    color: #fcd34d;
+}
+
+
+.settings-note p {
+    margin-bottom: 0;
+
+    color: #cbd5e1;
+
+    line-height: 1.6;
+}
+
+
+@media (max-width: 650px) {
+
+    .account-bar {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 15px;
+    }
+
+
+    .account-actions {
+        width: 100%;
+    }
+
+
+    .settings-btn,
+    .logout-btn {
+        flex: 1;
+        text-align: center;
+    }
+
+}

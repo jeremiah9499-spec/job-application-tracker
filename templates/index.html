@@ -60,14 +60,23 @@
             </div>
 
 
-            <a
-                href="{{ url_for('logout') }}"
-                class="logout-btn"
-            >
-                Log Out
-            </a>
+           <div class="account-actions">
 
-        </div>
+    <a
+        href="{{ url_for('settings') }}"
+        class="settings-btn"
+    >
+        ⚙ Account Settings
+    </a>
+
+    <a
+        href="{{ url_for('logout') }}"
+        class="logout-btn"
+    >
+        Log Out
+    </a>
+
+            </div>
 
 
 

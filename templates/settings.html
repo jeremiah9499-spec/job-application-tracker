@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+    <title>Account Settings | JobTracker</title>
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='style.css') }}"
+    >
+
+</head>
+
+
+<body>
+
+
+    <div class="form-page">
+
+
+        <div class="form-card">
+
+
+            <h1>
+                Account Settings
+            </h1>
+
+
+            <p class="subtitle">
+                Manage your JobTracker account and SMS reminder number.
+            </p>
+
+
+
+            <!-- FLASH MESSAGES -->
+
+            {% with messages = get_flashed_messages(with_categories=true) %}
+
+                {% if messages %}
+
+                    <div class="flash-container">
+
+                        {% for category, message in messages %}
+
+                            <div class="flash-message flash-{{ category }}">
+                                {{ message }}
+                            </div>
+
+                        {% endfor %}
+
+                    </div>
+
+                {% endif %}
+
+            {% endwith %}
+
+
+
+            <!-- EMAIL -->
+
+            <div class="settings-section">
+
+                <label>
+                    Account Email
+                </label>
+
+                <div class="settings-email">
+                    {{ user[0] }}
+                </div>
+
+            </div>
+
+
+
+            <!-- PHONE FORM -->
+
+            <form method="POST">
+
+
+                <div class="form-group">
+
+                    <label>
+                        SMS Phone Number
+                    </label>
+
+
+                    <input
+                        type="tel"
+                        name="phone_number"
+                        placeholder="+14045551234"
+                        value="{{ user[1] or '' }}"
+                    >
+
+
+                    <p class="settings-help">
+                        Include your country code.
+                        Example: +14045551234
+                    </p>
+
+                </div>
+
+
+
+                <div class="form-actions">
+
+
+                    <a
+                        href="{{ url_for('home') }}"
+                        class="btn cancel-btn"
+                    >
+                        Back to Dashboard
+                    </a>
+
+
+                    <button type="submit">
+                        Save Settings
+                    </button>
+
+
+                </div>
+
+
+            </form>
+
+
+
+            <div class="settings-note">
+
+                <strong>
+                    SMS reminder note
+                </strong>
+
+                <p>
+                    If JobTracker is using a Twilio trial account,
+                    Twilio may require this phone number to be verified
+                    before SMS messages can be delivered.
+                </p>
+
+            </div>
+
+
+        </div>
+
+
+    </div>
+
+
+</body>
+
+</html>

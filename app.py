@@ -20,6 +20,7 @@ from twilio.rest import Client
 
 import psycopg
 import os
+import re
 
 
 app = Flask(__name__)
@@ -68,8 +69,18 @@ def init_db():
         CREATE TABLE IF NOT EXISTS users (
             id SERIAL PRIMARY KEY,
             email TEXT UNIQUE NOT NULL,
-            password_hash TEXT NOT NULL
+            password_hash TEXT NOT NULL,
+            phone_number TEXT
         )
+    """)
+
+
+    # Handles users table created before
+    # phone numbers were added.
+
+    cursor.execute("""
+        ALTER TABLE users
+        ADD COLUMN IF NOT EXISTS phone_number TEXT
     """)
 
 
@@ -89,8 +100,8 @@ def init_db():
     """)
 
 
-    # Handles databases created before
-    # user accounts were added.
+    # Handles applications table created
+    # before user accounts were added.
 
     cursor.execute("""
         ALTER TABLE applications
@@ -107,7 +118,7 @@ def init_db():
 
 
 # =================================================
-# LOGIN REQUIRED DECORATOR
+# LOGIN REQUIRED
 # =================================================
 
 def login_required(view_function):
@@ -135,10 +146,37 @@ def login_required(view_function):
 
 
 # =================================================
+# PHONE NUMBER VALIDATION
+# =================================================
+
+def valid_phone_number(phone_number):
+
+    # Basic E.164 format:
+    # +14045551234
+    #
+    # Must begin with +
+    # followed by country code + number.
+
+    pattern = r"^\+[1-9]\d{7,14}$"
+
+    return bool(
+        re.match(
+            pattern,
+            phone_number
+        )
+    )
+
+
+# =================================================
 # SMS REMINDER FUNCTION
 # =================================================
 
-def send_sms_reminder():
+def send_sms_reminder(
+    phone_number,
+    company_name,
+    job_title,
+    days_waiting
+):
 
     account_sid = os.environ[
         "TWILIO_ACCOUNT_SID"
@@ -155,17 +193,52 @@ def send_sms_reminder():
     )
 
 
+    # -------------------------
+    # TWILIO TRIAL MODE
+    # -------------------------
+    #
+    # Your current Twilio trial account only
+    # allows predefined SMS templates.
+    #
+    # Later, after upgrading Twilio, set:
+    #
+    # TWILIO_TRIAL_MODE=false
+    #
+    # in Render and the personalized message
+    # below will automatically be used.
+
+    trial_mode = os.environ.get(
+        "TWILIO_TRIAL_MODE",
+        "true"
+    ).lower() == "true"
+
+
+    if trial_mode:
+
+        message_body = (
+            "sms_internal_alerts"
+        )
+
+    else:
+
+        message_body = (
+            f"JobTracker Reminder: "
+            f"You applied to {company_name} "
+            f"for {job_title} "
+            f"{days_waiting} days ago. "
+            f"It may be time to follow up."
+        )
+
+
     message = client.messages.create(
 
-        body="sms_internal_alerts",
+        body=message_body,
 
         from_=os.environ[
             "TWILIO_PHONE_NUMBER"
         ],
 
-        to=os.environ[
-            "MY_PHONE_NUMBER"
-        ]
+        to=phone_number
     )
 
 
@@ -473,6 +546,115 @@ def logout():
 
 
 # =================================================
+# ACCOUNT SETTINGS
+# =================================================
+
+@app.route(
+    "/settings",
+    methods=["GET", "POST"]
+)
+@login_required
+def settings():
+
+    user_id = session[
+        "user_id"
+    ]
+
+
+    connection = get_db_connection()
+    cursor = connection.cursor()
+
+
+    if request.method == "POST":
+
+        phone_number = (
+            request.form["phone_number"]
+            .strip()
+        )
+
+
+        # Allow user to remove their number.
+
+        if phone_number:
+
+            if not valid_phone_number(
+                phone_number
+            ):
+
+                cursor.close()
+                connection.close()
+
+                flash(
+                    "Enter your phone number in international format, for example +14045551234.",
+                    "error"
+                )
+
+                return redirect(
+                    url_for("settings")
+                )
+
+
+        cursor.execute(
+            """
+            UPDATE users
+            SET phone_number = %s
+            WHERE id = %s
+            """,
+            (
+                phone_number
+                if phone_number
+                else None,
+
+                user_id
+            )
+        )
+
+
+        connection.commit()
+
+        cursor.close()
+        connection.close()
+
+
+        flash(
+            "Account settings updated!",
+            "success"
+        )
+
+
+        return redirect(
+            url_for("settings")
+        )
+
+
+    cursor.execute(
+        """
+        SELECT
+            email,
+            phone_number
+
+        FROM users
+
+        WHERE id = %s
+        """,
+        (user_id,)
+    )
+
+
+    user = cursor.fetchone()
+
+
+    cursor.close()
+    connection.close()
+
+
+    return render_template(
+        "settings.html",
+        user=user
+    )
+
+
+# =================================================
 # PRIVATE DASHBOARD
 # =================================================
 
@@ -480,7 +662,9 @@ def logout():
 @login_required
 def home():
 
-    user_id = session["user_id"]
+    user_id = session[
+        "user_id"
+    ]
 
 
     connection = get_db_connection()
@@ -488,7 +672,7 @@ def home():
 
 
     # -------------------------
-    # LOAD THIS USER'S APPLICATIONS
+    # USER APPLICATIONS
     # -------------------------
 
     cursor.execute(
@@ -499,8 +683,11 @@ def home():
             job_title,
             status,
             date_applied
+
         FROM applications
+
         WHERE user_id = %s
+
         ORDER BY id DESC
         """,
         (user_id,)
@@ -511,7 +698,7 @@ def home():
 
 
     # -------------------------
-    # TOTAL APPLICATIONS
+    # TOTAL
     # -------------------------
 
     cursor.execute(
@@ -533,7 +720,9 @@ def home():
     cursor.execute(
         """
         SELECT COUNT(*)
+
         FROM applications
+
         WHERE user_id = %s
         AND status = %s
         """,
@@ -553,7 +742,9 @@ def home():
     cursor.execute(
         """
         SELECT COUNT(*)
+
         FROM applications
+
         WHERE user_id = %s
         AND status = %s
         """,
@@ -573,7 +764,9 @@ def home():
     cursor.execute(
         """
         SELECT COUNT(*)
+
         FROM applications
+
         WHERE user_id = %s
         AND status = %s
         """,
@@ -591,7 +784,7 @@ def home():
 
 
     # -------------------------
-    # CALCULATE DAYS WAITING
+    # DAYS WAITING
     # -------------------------
 
     applications_with_days = []
@@ -744,6 +937,7 @@ def delete_job(id):
     cursor.execute(
         """
         DELETE FROM applications
+
         WHERE id = %s
         AND user_id = %s
         """,
@@ -915,19 +1109,26 @@ def remind_job(id):
     cursor = connection.cursor()
 
 
+    # Get application
+    # AND the logged-in user's phone number.
+
     cursor.execute(
         """
         SELECT
-            id,
-            company_name,
-            job_title,
-            status,
-            date_applied
+            applications.id,
+            applications.company_name,
+            applications.job_title,
+            applications.status,
+            applications.date_applied,
+            users.phone_number
 
         FROM applications
 
-        WHERE id = %s
-        AND user_id = %s
+        JOIN users
+        ON users.id = applications.user_id
+
+        WHERE applications.id = %s
+        AND applications.user_id = %s
         """,
         (
             id,
@@ -955,9 +1156,51 @@ def remind_job(id):
         )
 
 
+    phone_number = application[5]
+
+
+    if not phone_number:
+
+        flash(
+            "Add your phone number in Account Settings before sending SMS reminders.",
+            "error"
+        )
+
+        return redirect(
+            url_for("settings")
+        )
+
+
+    company_name = application[1]
+    job_title = application[2]
+    date_applied = application[4]
+
+
+    if isinstance(
+        date_applied,
+        str
+    ):
+
+        date_applied = datetime.strptime(
+            date_applied,
+            "%Y-%m-%d"
+        ).date()
+
+
+    days_waiting = (
+        date.today()
+        - date_applied
+    ).days
+
+
     try:
 
-        send_sms_reminder()
+        send_sms_reminder(
+            phone_number,
+            company_name,
+            job_title,
+            days_waiting
+        )
 
 
         flash(
@@ -975,7 +1218,7 @@ def remind_job(id):
 
 
         flash(
-            "SMS reminder could not be sent.",
+            "SMS reminder could not be sent. If you are using a Twilio trial account, the destination number may need to be verified.",
             "error"
         )
 
