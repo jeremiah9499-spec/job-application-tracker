@@ -25,9 +25,9 @@ import os
 app = Flask(__name__)
 
 
-# -------------------------
+# =================================================
 # FLASK SECRET KEY
-# -------------------------
+# =================================================
 
 app.secret_key = os.environ.get(
     "FLASK_SECRET_KEY",
@@ -35,9 +35,9 @@ app.secret_key = os.environ.get(
 )
 
 
-# -------------------------
+# =================================================
 # DATABASE CONNECTION
-# -------------------------
+# =================================================
 
 def get_db_connection():
 
@@ -50,18 +50,20 @@ def get_db_connection():
     return connection
 
 
-# -------------------------
+# =================================================
 # DATABASE SETUP
-# -------------------------
+# =================================================
 
 def init_db():
 
     connection = get_db_connection()
-
     cursor = connection.cursor()
 
 
+    # -------------------------
     # USERS TABLE
+    # -------------------------
+
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS users (
             id SERIAL PRIMARY KEY,
@@ -71,7 +73,10 @@ def init_db():
     """)
 
 
+    # -------------------------
     # APPLICATIONS TABLE
+    # -------------------------
+
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS applications (
             id SERIAL PRIMARY KEY,
@@ -84,8 +89,9 @@ def init_db():
     """)
 
 
-    # This handles the existing applications table
-    # that was created before users existed.
+    # Handles databases created before
+    # user accounts were added.
+
     cursor.execute("""
         ALTER TABLE applications
         ADD COLUMN IF NOT EXISTS user_id
@@ -100,9 +106,9 @@ def init_db():
     connection.close()
 
 
-# -------------------------
+# =================================================
 # LOGIN REQUIRED DECORATOR
-# -------------------------
+# =================================================
 
 def login_required(view_function):
 
@@ -128,9 +134,9 @@ def login_required(view_function):
     return wrapped_view
 
 
-# -------------------------
+# =================================================
 # SMS REMINDER FUNCTION
-# -------------------------
+# =================================================
 
 def send_sms_reminder():
 
@@ -168,6 +174,18 @@ def send_sms_reminder():
 
 # Make sure database tables exist
 init_db()
+
+
+# =================================================
+# PUBLIC LANDING PAGE
+# =================================================
+
+@app.route("/")
+def landing():
+
+    return render_template(
+        "landing.html"
+    )
 
 
 # =================================================
@@ -245,11 +263,9 @@ def signup():
 
 
         connection = get_db_connection()
-
         cursor = connection.cursor()
 
 
-        # Check whether email already exists
         cursor.execute(
             """
             SELECT id
@@ -278,7 +294,6 @@ def signup():
             )
 
 
-        # Hash password before saving it
         password_hash = generate_password_hash(
             password
         )
@@ -311,11 +326,9 @@ def signup():
         connection.close()
 
 
-        # Automatically log user in
         session.clear()
 
         session["user_id"] = user_id
-
         session["user_email"] = email
 
 
@@ -366,7 +379,6 @@ def login():
 
 
         connection = get_db_connection()
-
         cursor = connection.cursor()
 
 
@@ -420,7 +432,6 @@ def login():
         session.clear()
 
         session["user_id"] = user[0]
-
         session["user_email"] = user[1]
 
 
@@ -462,10 +473,10 @@ def logout():
 
 
 # =================================================
-# HOME PAGE
+# PRIVATE DASHBOARD
 # =================================================
 
-@app.route("/")
+@app.route("/dashboard")
 @login_required
 def home():
 
@@ -473,11 +484,13 @@ def home():
 
 
     connection = get_db_connection()
-
     cursor = connection.cursor()
 
 
-    # Only load THIS USER'S applications
+    # -------------------------
+    # LOAD THIS USER'S APPLICATIONS
+    # -------------------------
+
     cursor.execute(
         """
         SELECT
@@ -498,7 +511,7 @@ def home():
 
 
     # -------------------------
-    # TOTAL
+    # TOTAL APPLICATIONS
     # -------------------------
 
     cursor.execute(
@@ -578,7 +591,7 @@ def home():
 
 
     # -------------------------
-    # DAYS WAITING
+    # CALCULATE DAYS WAITING
     # -------------------------
 
     applications_with_days = []
@@ -651,14 +664,12 @@ def add_job():
             "date_applied"
         ]
 
-
         user_id = session[
             "user_id"
         ]
 
 
         connection = get_db_connection()
-
         cursor = connection.cursor()
 
 
@@ -727,11 +738,9 @@ def delete_job(id):
 
 
     connection = get_db_connection()
-
     cursor = connection.cursor()
 
 
-    # user_id is included here for security.
     cursor.execute(
         """
         DELETE FROM applications
@@ -779,7 +788,6 @@ def edit_job(id):
 
 
     connection = get_db_connection()
-
     cursor = connection.cursor()
 
 
@@ -904,7 +912,6 @@ def remind_job(id):
 
 
     connection = get_db_connection()
-
     cursor = connection.cursor()
 
 
