@@ -1953,3 +1953,447 @@ th[onclick]:hover {
 
     font-size: 12px;
 }
+
+/* =================================================
+   NEXTSTRIDE SIDEBAR DASHBOARD
+================================================= */
+
+html {
+    scroll-behavior: smooth;
+}
+
+
+.dashboard-body {
+    margin: 0;
+}
+
+
+.dashboard-layout {
+    min-height: 100vh;
+}
+
+
+/* =================================================
+   SIDEBAR
+================================================= */
+
+.sidebar {
+    position: fixed;
+
+    top: 0;
+    left: 0;
+    bottom: 0;
+
+    width: 260px;
+
+    padding: 28px 18px;
+
+    display: flex;
+    flex-direction: column;
+
+    box-sizing: border-box;
+
+    border-right:
+        1px solid
+        rgba(255, 255, 255, 0.08);
+
+    background:
+        rgba(10, 17, 32, 0.98);
+
+    z-index: 1000;
+}
+
+
+.sidebar-brand {
+    padding: 0 8px 30px;
+}
+
+
+.sidebar-logo {
+    display: block;
+}
+
+
+.sidebar-logo img {
+    display: block;
+
+    width: 205px;
+    max-width: 100%;
+
+    height: auto;
+}
+
+
+.sidebar-nav {
+    display: flex;
+    flex-direction: column;
+
+    gap: 7px;
+}
+
+
+.sidebar-link {
+    min-height: 46px;
+
+    padding: 0 14px;
+
+    display: flex;
+    align-items: center;
+
+    gap: 12px;
+
+    border-radius: 9px;
+
+    color: #94a3b8;
+
+    text-decoration: none;
+
+    font-size: 14px;
+    font-weight: 700;
+
+    transition:
+        background 0.2s ease,
+        color 0.2s ease,
+        transform 0.2s ease;
+}
+
+
+.sidebar-link:hover {
+    color: #ffffff;
+
+    background:
+        rgba(59, 130, 246, 0.10);
+
+    transform: translateX(2px);
+}
+
+
+.sidebar-link.active {
+    color: #ffffff;
+
+    background:
+        linear-gradient(
+            90deg,
+            rgba(37, 99, 235, 0.22),
+            rgba(139, 92, 246, 0.12)
+        );
+
+    border:
+        1px solid
+        rgba(96, 165, 250, 0.18);
+}
+
+
+.sidebar-icon {
+    width: 20px;
+
+    text-align: center;
+
+    color: #60a5fa;
+
+    font-size: 17px;
+}
+
+
+.sidebar-bottom {
+    margin-top: auto;
+
+    display: flex;
+    flex-direction: column;
+
+    gap: 7px;
+}
+
+
+.sidebar-user {
+    margin-bottom: 12px;
+
+    padding: 15px 14px;
+
+    border:
+        1px solid
+        rgba(255, 255, 255, 0.07);
+
+    border-radius: 9px;
+
+    background:
+        rgba(255, 255, 255, 0.025);
+}
+
+
+.sidebar-user-label {
+    display: block;
+
+    margin-bottom: 5px;
+
+    color: #64748b;
+
+    font-size: 9px;
+    font-weight: 800;
+
+    letter-spacing: 1.2px;
+}
+
+
+.sidebar-user-email {
+    display: block;
+
+    overflow: hidden;
+
+    color: #cbd5e1;
+
+    font-size: 12px;
+
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+
+.sidebar-logout:hover {
+    color: #fca5a5;
+
+    background:
+        rgba(239, 68, 68, 0.08);
+}
+
+
+/* =================================================
+   MAIN CONTENT
+================================================= */
+
+.dashboard-content {
+    min-height: 100vh;
+
+    margin-left: 260px;
+
+    padding: 55px 55px 30px;
+
+    box-sizing: border-box;
+}
+
+
+.dashboard-main-header {
+    margin-bottom: 35px;
+
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+
+    gap: 30px;
+}
+
+
+.dashboard-main-header h1 {
+    margin:
+        0 0
+        8px;
+}
+
+
+.dashboard-add-btn {
+    flex-shrink: 0;
+
+    margin-top: 5px;
+}
+
+
+.dashboard-section {
+    scroll-margin-top: 30px;
+}
+
+
+.application-toolbar {
+    margin-bottom: 22px;
+
+    display: grid;
+
+    grid-template-columns:
+        minmax(240px, 1fr)
+        190px;
+
+    gap: 12px;
+}
+
+
+.application-toolbar input,
+.application-toolbar select {
+    width: 100%;
+
+    box-sizing: border-box;
+}
+
+
+.follow-up-section {
+    margin-top: 25px;
+}
+
+
+.follow-up-description {
+    max-width: 650px;
+
+    margin-bottom: 22px;
+
+    color: #94a3b8;
+
+    line-height: 1.7;
+}
+
+
+/* =================================================
+   MOBILE HEADER
+================================================= */
+
+.mobile-dashboard-header {
+    display: none;
+}
+
+
+.sidebar-overlay {
+    display: none;
+}
+
+
+/* =================================================
+   TABLET / MOBILE
+================================================= */
+
+@media (max-width: 950px) {
+
+    .sidebar {
+        transform: translateX(-100%);
+
+        transition:
+            transform 0.25s ease;
+    }
+
+
+    .sidebar.sidebar-open {
+        transform: translateX(0);
+    }
+
+
+    .dashboard-content {
+        margin-left: 0;
+
+        padding:
+            100px
+            25px
+            30px;
+    }
+
+
+    .mobile-dashboard-header {
+        position: fixed;
+
+        top: 0;
+        left: 0;
+        right: 0;
+
+        height: 72px;
+
+        padding: 0 20px;
+
+        display: flex;
+        align-items: center;
+
+        gap: 18px;
+
+        box-sizing: border-box;
+
+        border-bottom:
+            1px solid
+            rgba(255, 255, 255, 0.08);
+
+        background:
+            rgba(10, 17, 32, 0.96);
+
+        backdrop-filter: blur(12px);
+
+        z-index: 900;
+    }
+
+
+    .sidebar-toggle {
+        width: 42px;
+        height: 42px;
+
+        border:
+            1px solid
+            rgba(255, 255, 255, 0.10);
+
+        border-radius: 8px;
+
+        background:
+            rgba(255, 255, 255, 0.04);
+
+        color: #ffffff;
+
+        font-size: 21px;
+
+        cursor: pointer;
+    }
+
+
+    .mobile-dashboard-logo {
+        display: block;
+    }
+
+
+    .mobile-dashboard-logo img {
+        display: block;
+
+        width: 175px;
+        height: auto;
+    }
+
+
+    .sidebar-overlay-visible {
+        position: fixed;
+
+        inset: 0;
+
+        display: block;
+
+        background:
+            rgba(0, 0, 0, 0.55);
+
+        z-index: 950;
+    }
+
+}
+
+
+@media (max-width: 700px) {
+
+    .dashboard-content {
+        padding:
+            95px
+            16px
+            25px;
+    }
+
+
+    .dashboard-main-header {
+        flex-direction: column;
+    }
+
+
+    .dashboard-add-btn {
+        width: 100%;
+
+        box-sizing: border-box;
+
+        text-align: center;
+    }
+
+
+    .application-toolbar {
+        grid-template-columns: 1fr;
+    }
+
+
+    .mobile-dashboard-logo img {
+        width: 150px;
+    }
+
+}
