@@ -3,32 +3,77 @@
 <html>
 <head>
     <title>Job Tracker</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='style.css') }}"
+    >
 </head>
 
 <body>
 
     <div class="container">
 
+
+        <!-- =========================
+             FLASH MESSAGES
+        ========================== -->
+
         {% with messages = get_flashed_messages(with_categories=true) %}
 
-    {% if messages %}
+            {% if messages %}
 
-        <div class="flash-container">
+                <div class="flash-container">
 
-            {% for category, message in messages %}
+                    {% for category, message in messages %}
 
-                <div class="flash-message flash-{{ category }}">
-                    {{ message }}
+                        <div class="flash-message flash-{{ category }}">
+                            {{ message }}
+                        </div>
+
+                    {% endfor %}
+
                 </div>
 
-            {% endfor %}
+            {% endif %}
+
+        {% endwith %}
+
+
+
+        <!-- =========================
+             TOP ACCOUNT BAR
+        ========================== -->
+
+        <div class="account-bar">
+
+            <div class="account-info">
+
+                <span class="account-label">
+                    Signed in as
+                </span>
+
+                <span class="account-email">
+                    {{ session["user_email"] }}
+                </span>
+
+            </div>
+
+
+            <a
+                href="{{ url_for('logout') }}"
+                class="logout-btn"
+            >
+                Log Out
+            </a>
 
         </div>
 
-    {% endif %}
 
-{% endwith %}
+
+        <!-- =========================
+             PAGE HEADER
+        ========================== -->
 
         <h1>Job Application Tracker</h1>
 
@@ -36,45 +81,91 @@
             Keep track of your job applications in one place.
         </p>
 
-        <!-- DASHBOARD STATS -->
+
+
+        <!-- =========================
+             DASHBOARD STATS
+        ========================== -->
+
         <div class="stats">
 
+
             <div class="stat-card">
+
                 <p>Total Applications</p>
-                <h2>{{ total }}</h2>
+
+                <h2>
+                    {{ total }}
+                </h2>
+
             </div>
 
+
             <div class="stat-card">
+
                 <p>Applied</p>
-                <h2>{{ applied }}</h2>
+
+                <h2>
+                    {{ applied }}
+                </h2>
+
             </div>
 
+
             <div class="stat-card">
+
                 <p>Interviews</p>
-                <h2>{{ interviews }}</h2>
+
+                <h2>
+                    {{ interviews }}
+                </h2>
+
             </div>
 
+
             <div class="stat-card">
+
                 <p>Offers</p>
-                <h2>{{ offers }}</h2>
+
+                <h2>
+                    {{ offers }}
+                </h2>
+
             </div>
+
 
         </div>
 
 
-        <!-- ADD APPLICATION BUTTON -->
-        <a href="{{ url_for('add_job') }}" class="btn">
+
+        <!-- =========================
+             ADD APPLICATION
+        ========================== -->
+
+        <a
+            href="{{ url_for('add_job') }}"
+            class="btn"
+        >
             + Add Application
         </a>
 
 
-        <!-- SAVED APPLICATIONS -->
+
+        <!-- =========================
+             SAVED APPLICATIONS
+        ========================== -->
+
         <div class="card">
 
-            <h2>Saved Applications</h2>
+
+            <h2>
+                Saved Applications
+            </h2>
+
 
 
             <!-- SEARCH -->
+
             <input
                 type="text"
                 id="searchInput"
@@ -82,7 +173,9 @@
             >
 
 
+
             <!-- STATUS FILTER -->
+
             <select id="statusFilter">
 
                 <option value="all">
@@ -108,12 +201,18 @@
             </select>
 
 
-            <!-- APPLICATION TABLE -->
+
+            <!-- =========================
+                 APPLICATION TABLE
+            ========================== -->
+
             <table id="applicationsTable">
+
 
                 <thead>
 
                     <tr>
+
                         <th onclick="sortTable(0)">
                             Company ↕
                         </th>
@@ -137,30 +236,40 @@
                         <th>
                             Actions
                         </th>
+
                     </tr>
 
                 </thead>
 
 
+
                 <tbody id="applicationsBody">
+
 
                     {% for application in applications %}
 
+
                     <tr>
 
+
                         <!-- COMPANY -->
+
                         <td>
                             {{ application[1] }}
                         </td>
 
 
+
                         <!-- JOB TITLE -->
+
                         <td>
                             {{ application[2] }}
                         </td>
 
 
+
                         <!-- STATUS -->
+
                         <td>
 
                             <span
@@ -172,24 +281,38 @@
                         </td>
 
 
+
                         <!-- DATE APPLIED -->
+
                         <td>
                             {{ application[4] }}
                         </td>
 
 
-                        <!-- DAYS WAITING + FOLLOW UP -->
+
+                        <!-- =========================
+                             DAYS WAITING / FOLLOW UP
+                        ========================== -->
+
                         <td>
+
 
                             {% if application[5] > 7 and application[3] == "Applied" %}
 
+
                                 <span class="follow-up">
-                                    {{ application[5] }} days — Follow Up
+
+                                    {{ application[5] }}
+                                    days — Follow Up
+
                                 </span>
+
 
                                 <br><br>
 
+
                                 <!-- SMS REMINDER BUTTON -->
+
                                 <a
                                     href="{{ url_for('remind_job', id=application[0]) }}"
                                     class="reminder-btn"
@@ -198,17 +321,26 @@
                                     📱 Send Reminder
                                 </a>
 
+
                             {% else %}
+
 
                                 {{ application[5] }} days
 
+
                             {% endif %}
+
 
                         </td>
 
 
-                        <!-- ACTIONS -->
+
+                        <!-- =========================
+                             ACTION BUTTONS
+                        ========================== -->
+
                         <td>
+
 
                             <a
                                 href="{{ url_for('edit_job', id=application[0]) }}"
@@ -226,51 +358,71 @@
                                 Delete
                             </a>
 
+
                         </td>
+
 
                     </tr>
 
+
                     {% endfor %}
+
 
                 </tbody>
 
+
             </table>
 
+
         </div>
+
 
     </div>
 
 
-    <!-- JAVASCRIPT -->
+
+    <!-- =========================
+         JAVASCRIPT
+    ========================== -->
+
     <script>
+
 
         const searchInput =
             document.getElementById("searchInput");
 
+
         const statusFilter =
             document.getElementById("statusFilter");
+
 
         const tableBody =
             document.getElementById("applicationsBody");
 
 
-        /* -------------------------
+
+        /* =========================
            SEARCH + FILTER
-        ------------------------- */
+        ========================== */
 
         function filterApplications() {
+
 
             const searchText =
                 searchInput.value.toLowerCase();
 
+
             const selectedStatus =
                 statusFilter.value.toLowerCase();
+
 
             const rows =
                 tableBody.querySelectorAll("tr");
 
 
+
             rows.forEach(function(row) {
+
 
                 const rowText =
                     row.textContent.toLowerCase();
@@ -281,6 +433,7 @@
 
 
                 let rowStatus = "";
+
 
 
                 if (statusElement) {
@@ -294,17 +447,22 @@
                 }
 
 
+
                 const matchesSearch =
                     rowText.includes(searchText);
 
 
+
                 const matchesStatus =
-                    selectedStatus === "all" ||
+                    selectedStatus === "all"
+                    ||
                     rowStatus === selectedStatus;
 
 
+
                 if (
-                    matchesSearch &&
+                    matchesSearch
+                    &&
                     matchesStatus
                 ) {
 
@@ -316,9 +474,12 @@
 
                 }
 
+
             });
 
+
         }
+
 
 
         searchInput.addEventListener(
@@ -327,20 +488,24 @@
         );
 
 
+
         statusFilter.addEventListener(
             "change",
             filterApplications
         );
 
 
-        /* -------------------------
+
+        /* =========================
            TABLE SORTING
-        ------------------------- */
+        ========================== */
 
         let sortDirections = {};
 
 
+
         function sortTable(columnIndex) {
+
 
             const rows =
                 Array.from(
@@ -348,21 +513,26 @@
                 );
 
 
+
             sortDirections[columnIndex] =
                 !sortDirections[columnIndex];
+
 
 
             const ascending =
                 sortDirections[columnIndex];
 
 
+
             rows.sort(function(rowA, rowB) {
+
 
                 const valueA =
                     rowA.cells[columnIndex]
                         .textContent
                         .trim()
                         .toLowerCase();
+
 
 
                 const valueB =
@@ -372,19 +542,32 @@
                         .toLowerCase();
 
 
+
                 if (valueA < valueB) {
-                    return ascending ? -1 : 1;
+
+                    return ascending
+                        ? -1
+                        : 1;
+
                 }
+
 
 
                 if (valueA > valueB) {
-                    return ascending ? 1 : -1;
+
+                    return ascending
+                        ? 1
+                        : -1;
+
                 }
+
 
 
                 return 0;
 
+
             });
+
 
 
             rows.forEach(function(row) {
@@ -393,9 +576,13 @@
 
             });
 
+
         }
+
 
     </script>
 
+
 </body>
+
 </html>

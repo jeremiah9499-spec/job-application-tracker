@@ -452,3 +452,72 @@ th[onclick]:hover {
 .auth-switch a:hover {
     text-decoration: underline;
 }
+
+/* =========================
+   ACCOUNT BAR
+========================= */
+
+.account-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    margin-bottom: 30px;
+
+    padding: 14px 18px;
+
+    background: rgba(255, 255, 255, 0.08);
+
+    border: 1px solid rgba(255, 255, 255, 0.15);
+
+    border-radius: 12px;
+
+    backdrop-filter: blur(10px);
+}
+
+
+.account-info {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+
+
+.account-label {
+    font-size: 12px;
+    color: #94a3b8;
+}
+
+
+.account-email {
+    color: white;
+    font-weight: bold;
+}
+
+
+/* LOGOUT BUTTON */
+
+.logout-btn {
+    display: inline-block;
+
+    padding: 9px 15px;
+
+    border-radius: 8px;
+
+    background: #475569;
+    color: white;
+
+    text-decoration: none;
+
+    font-size: 14px;
+    font-weight: bold;
+
+    transition: 0.2s;
+}
+
+
+.logout-btn:hover {
+    background: #64748b;
+
+    transform: translateY(-1px);
+}
