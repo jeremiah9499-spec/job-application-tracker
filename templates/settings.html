@@ -4,11 +4,22 @@
 
 <head>
 
-    <title>Account Settings | JobTracker</title>
+    <title>Account Settings | NextStride</title>
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1"
+    >
 
     <link
         rel="stylesheet"
         href="{{ url_for('static', filename='style.css') }}"
+    >
+
+    <link
+        rel="icon"
+        type="image/png"
+        href="{{ url_for('static', filename='nextstride-icon.png') }}"
     >
 
 </head>
@@ -23,18 +34,43 @@
         <div class="form-card">
 
 
+            <!-- =========================
+                 CLICKABLE NEXTSTRIDE LOGO
+            ========================== -->
+
+            <a
+                href="{{ url_for('landing') }}"
+                class="auth-brand-logo"
+                aria-label="Return to NextStride home"
+            >
+
+                <img
+                    src="{{ url_for('static', filename='nextstride-logo.png') }}"
+                    alt="NextStride - Your career. Your next move."
+                >
+
+            </a>
+
+
+
+            <!-- =========================
+                 SETTINGS HEADER
+            ========================== -->
+
             <h1>
                 Account Settings
             </h1>
 
 
             <p class="subtitle">
-                Manage your JobTracker account and SMS reminder number.
+                Manage your NextStride account and SMS reminder settings.
             </p>
 
 
 
-            <!-- FLASH MESSAGES -->
+            <!-- =========================
+                 FLASH MESSAGES
+            ========================== -->
 
             {% with messages = get_flashed_messages(with_categories=true) %}
 
@@ -58,13 +94,16 @@
 
 
 
-            <!-- EMAIL -->
+            <!-- =========================
+                 ACCOUNT EMAIL
+            ========================== -->
 
             <div class="settings-section">
 
                 <label>
                     Account Email
                 </label>
+
 
                 <div class="settings-email">
                     {{ user[0] }}
@@ -74,7 +113,9 @@
 
 
 
-            <!-- PHONE FORM -->
+            <!-- =========================
+                 PHONE NUMBER FORM
+            ========================== -->
 
             <form method="POST">
 
@@ -91,17 +132,30 @@
                         name="phone_number"
                         placeholder="+14045551234"
                         value="{{ user[1] or '' }}"
+                        autocomplete="tel"
                     >
 
 
                     <p class="settings-help">
-                        Include your country code.
-                        Example: +14045551234
+
+                        Enter your phone number using international format.
+
+                        <br>
+
+                        Example:
+                        <strong>
+                            +14045551234
+                        </strong>
+
                     </p>
 
                 </div>
 
 
+
+                <!-- =========================
+                     ACTION BUTTONS
+                ========================== -->
 
                 <div class="form-actions">
 
@@ -110,11 +164,14 @@
                         href="{{ url_for('home') }}"
                         class="btn cancel-btn"
                     >
-                        Back to Dashboard
+                        ← Back to Dashboard
                     </a>
 
 
-                    <button type="submit">
+                    <button
+                        type="submit"
+                        class="auth-submit-btn settings-save-btn"
+                    >
                         Save Settings
                     </button>
 
@@ -126,17 +183,62 @@
 
 
 
+            <!-- =========================
+                 SMS INFORMATION
+            ========================== -->
+
             <div class="settings-note">
 
-                <strong>
-                    SMS reminder note
-                </strong>
+
+                <div class="settings-note-heading">
+
+                    <span class="settings-note-icon">
+                        📱
+                    </span>
+
+
+                    <strong>
+                        SMS Reminders
+                    </strong>
+
+                </div>
+
 
                 <p>
-                    If JobTracker is using a Twilio trial account,
-                    Twilio may require this phone number to be verified
-                    before SMS messages can be delivered.
+
+                    NextStride can send follow-up reminders
+                    to the phone number saved on your account.
+
                 </p>
+
+
+                <p>
+
+                    If NextStride is currently using a Twilio
+                    trial account, Twilio may require your
+                    phone number to be verified before messages
+                    can be delivered.
+
+                </p>
+
+
+            </div>
+
+
+
+            <!-- =========================
+                 NEXTSTRIDE TAGLINE
+            ========================== -->
+
+            <div class="settings-brand-footer">
+
+                <strong>
+                    NextStride
+                </strong>
+
+                <span>
+                    Your career. Your next move.
+                </span>
 
             </div>
 

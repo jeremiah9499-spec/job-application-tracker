@@ -1,10 +1,29 @@
 <!DOCTYPE html>
 
 <html>
+
 <head>
-    <title>Add Application</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+
+    <title>Add Application | NextStride</title>
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1"
+    >
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='style.css') }}"
+    >
+
+    <link
+        rel="icon"
+        type="image/png"
+        href="{{ url_for('static', filename='nextstride-icon.png') }}"
+    >
+
 </head>
+
 
 <body>
 
@@ -12,72 +31,153 @@
 
         <div class="form-card">
 
-            <h1>Add Job Application</h1>
+
+            <!-- CLICKABLE NEXTSTRIDE LOGO -->
+
+            <a
+                href="{{ url_for('landing') }}"
+                class="auth-brand-logo"
+                aria-label="Return to NextStride home"
+            >
+
+                <img
+                    src="{{ url_for('static', filename='nextstride-logo.png') }}"
+                    alt="NextStride - Your career. Your next move."
+                >
+
+            </a>
+
+
+            <h1>
+                Add Application
+            </h1>
 
             <p class="subtitle">
-                Enter the details of the job application you want to track.
+                Add a new opportunity to your NextStride dashboard.
             </p>
+
 
             <form method="POST">
 
+
                 <div class="form-group">
-                    <label>Company Name</label>
+
+                    <label>
+                        Company Name
+                    </label>
+
                     <input
                         type="text"
                         name="company_name"
+                        placeholder="Example: Nike"
                         required
                     >
+
                 </div>
 
+
                 <div class="form-group">
-                    <label>Job Title</label>
+
+                    <label>
+                        Job Title
+                    </label>
+
                     <input
                         type="text"
                         name="job_title"
+                        placeholder="Example: Software Engineer"
                         required
                     >
+
                 </div>
 
+
                 <div class="form-group">
-                    <label>Status</label>
+
+                    <label>
+                        Status
+                    </label>
 
                     <select name="status">
-                        <option value="Applied">Applied</option>
-                        <option value="Interview">Interview</option>
-                        <option value="Offered">Offered</option>
-                        <option value="Rejected">Rejected</option>
+
+                        <option value="Applied">
+                            Applied
+                        </option>
+
+                        <option value="Interview">
+                            Interview
+                        </option>
+
+                        <option value="Offered">
+                            Offered
+                        </option>
+
+                        <option value="Rejected">
+                            Rejected
+                        </option>
+
                     </select>
+
                 </div>
 
+
                 <div class="form-group">
-                    <label>Date Applied</label>
+
+                    <label>
+                        Date Applied
+                    </label>
+
                     <input
                         type="date"
                         name="date_applied"
                         required
                     >
+
                 </div>
 
+
                 <div class="form-actions">
+
 
                     <a
                         href="{{ url_for('home') }}"
                         class="btn cancel-btn"
                     >
-                        Cancel
+                        ← Back to Dashboard
                     </a>
 
-                    <button type="submit">
+
+                    <button
+                        type="submit"
+                        class="auth-submit-btn form-save-btn"
+                    >
                         Save Application
                     </button>
 
+
                 </div>
 
+
             </form>
+
+
+            <div class="form-brand-footer">
+
+                <strong>
+                    NextStride
+                </strong>
+
+                <span>
+                    Your career. Your next move.
+                </span>
+
+            </div>
+
 
         </div>
 
     </div>
 
 </body>
+
 </html>

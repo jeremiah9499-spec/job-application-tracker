@@ -4,16 +4,27 @@
 
 <head>
 
-    <title>Job Tracker | Organize Your Job Search</title>
+    <title>NextStride | Your career. Your next move.</title>
 
     <meta
         name="viewport"
         content="width=device-width, initial-scale=1"
     >
 
+    <meta
+        name="description"
+        content="NextStride helps you track job applications, monitor progress, manage follow-ups, and stay organized throughout your job search."
+    >
+
     <link
         rel="stylesheet"
         href="{{ url_for('static', filename='style.css') }}"
+    >
+
+    <link
+        rel="icon"
+        type="image/png"
+        href="{{ url_for('static', filename='nextstride-icon.png') }}"
     >
 
 </head>
@@ -22,24 +33,35 @@
 <body class="landing-body">
 
 
-    <!-- =========================
+    <!-- =================================================
          NAVIGATION
-    ========================== -->
+    ================================================== -->
 
     <nav class="landing-nav">
 
+
+        <!-- CLICKABLE NEXTSTRIDE LOGO -->
+
         <a
             href="{{ url_for('landing') }}"
-            class="landing-logo"
+            class="nextstride-nav-logo"
+            aria-label="NextStride home"
         >
-            JobTracker
+
+            <img
+                src="{{ url_for('static', filename='nextstride-logo.png') }}"
+                alt="NextStride - Your career. Your next move."
+            >
+
         </a>
+
 
 
         <div class="landing-nav-actions">
 
 
             {% if session.get("user_id") %}
+
 
                 <a
                     href="{{ url_for('home') }}"
@@ -48,7 +70,9 @@
                     Dashboard
                 </a>
 
+
             {% else %}
+
 
                 <a
                     href="{{ url_for('login') }}"
@@ -65,46 +89,54 @@
                     Get Started
                 </a>
 
+
             {% endif %}
 
 
         </div>
 
+
     </nav>
 
 
 
-    <!-- =========================
-         HERO SECTION
-    ========================== -->
+    <!-- =================================================
+         MAIN CONTENT
+    ================================================== -->
 
     <main class="landing-main">
 
+
+        <!-- =================================================
+             HERO SECTION
+        ================================================== -->
 
         <section class="landing-hero">
 
 
             <div class="landing-badge">
-                YOUR JOB SEARCH, ORGANIZED
+                YOUR CAREER. YOUR NEXT MOVE.
             </div>
+
 
 
             <h1 class="landing-title">
 
-                Stop losing track of
+                Track every application.
 
                 <span>
-                    job applications.
+                    Take your next stride.
                 </span>
 
             </h1>
 
 
+
             <p class="landing-description">
 
-                Track every application, monitor your progress,
-                stay on top of follow-ups, and manage your entire
-                job search from one dashboard.
+                NextStride gives you one place to track applications,
+                monitor your progress, stay ahead of follow-ups,
+                and keep your career search moving forward.
 
             </p>
 
@@ -115,6 +147,7 @@
 
                 {% if session.get("user_id") %}
 
+
                     <a
                         href="{{ url_for('home') }}"
                         class="landing-primary-btn"
@@ -122,13 +155,15 @@
                         Open Dashboard →
                     </a>
 
+
                 {% else %}
+
 
                     <a
                         href="{{ url_for('signup') }}"
                         class="landing-primary-btn"
                     >
-                        Start Tracking →
+                        Start Your NextStride →
                     </a>
 
 
@@ -139,14 +174,16 @@
                         I Already Have an Account
                     </a>
 
+
                 {% endif %}
 
 
             </div>
 
 
+
             <p class="landing-small-text">
-                Create an account and start tracking in seconds.
+                Create an account and start organizing your job search in seconds.
             </p>
 
 
@@ -154,15 +191,17 @@
 
 
 
-        <!-- =========================
+        <!-- =================================================
              DASHBOARD PREVIEW
-        ========================== -->
+        ================================================== -->
 
         <section class="landing-preview">
 
 
             <div class="preview-window">
 
+
+                <!-- FAKE BROWSER BAR -->
 
                 <div class="preview-window-top">
 
@@ -177,28 +216,35 @@
                 <div class="preview-content">
 
 
+                    <!-- PREVIEW HEADING -->
+
                     <div class="preview-heading">
+
 
                         <div>
 
                             <p>
-                                DASHBOARD
+                                NEXTSTRIDE DASHBOARD
                             </p>
 
                             <h2>
-                                Your Job Search
+                                Your Career Search
                             </h2>
 
                         </div>
+
 
 
                         <div class="preview-add-button">
                             + Add Application
                         </div>
 
+
                     </div>
 
 
+
+                    <!-- PREVIEW STATS -->
 
                     <div class="preview-stats">
 
@@ -216,6 +262,7 @@
                         </div>
 
 
+
                         <div class="preview-stat">
 
                             <span>
@@ -229,6 +276,7 @@
                         </div>
 
 
+
                         <div class="preview-stat">
 
                             <span>
@@ -240,6 +288,7 @@
                             </strong>
 
                         </div>
+
 
 
                         <div class="preview-stat">
@@ -259,22 +308,38 @@
 
 
 
+                    <!-- PREVIEW TABLE -->
+
                     <div class="preview-table">
 
 
                         <div class="preview-row preview-table-header">
 
-                            <span>Company</span>
-                            <span>Position</span>
-                            <span>Status</span>
+                            <span>
+                                Company
+                            </span>
+
+                            <span>
+                                Position
+                            </span>
+
+                            <span>
+                                Status
+                            </span>
 
                         </div>
 
 
+
                         <div class="preview-row">
 
-                            <span>Northstar</span>
-                            <span>Frontend Developer</span>
+                            <span>
+                                Northstar
+                            </span>
+
+                            <span>
+                                Frontend Developer
+                            </span>
 
                             <span class="preview-status preview-interview">
                                 Interview
@@ -283,10 +348,16 @@
                         </div>
 
 
+
                         <div class="preview-row">
 
-                            <span>Vertex Labs</span>
-                            <span>Software Engineer</span>
+                            <span>
+                                Vertex Labs
+                            </span>
+
+                            <span>
+                                Software Engineer
+                            </span>
 
                             <span class="preview-status preview-applied">
                                 Applied
@@ -295,10 +366,16 @@
                         </div>
 
 
+
                         <div class="preview-row">
 
-                            <span>BrightWorks</span>
-                            <span>Web Developer</span>
+                            <span>
+                                BrightWorks
+                            </span>
+
+                            <span>
+                                Web Developer
+                            </span>
 
                             <span class="preview-status preview-offer">
                                 Offered
@@ -320,22 +397,26 @@
 
 
 
-        <!-- =========================
+        <!-- =================================================
              FEATURES
-        ========================== -->
+        ================================================== -->
 
         <section class="landing-features">
 
 
             <div class="landing-section-heading">
 
+
                 <p>
-                    BUILT FOR THE JOB SEARCH
+                    BUILT TO KEEP YOU MOVING
                 </p>
 
+
                 <h2>
-                    Everything in one place.
+                    Your entire job search.
+                    One organized workspace.
                 </h2>
+
 
             </div>
 
@@ -343,6 +424,8 @@
 
             <div class="landing-feature-grid">
 
+
+                <!-- FEATURE 1 -->
 
                 <div class="landing-feature-card">
 
@@ -355,13 +438,15 @@
                     </h3>
 
                     <p>
-                        Keep company names, positions, statuses
-                        and application dates organized.
+                        Keep every company, position, status,
+                        and application date organized in one place.
                     </p>
 
                 </div>
 
 
+
+                <!-- FEATURE 2 -->
 
                 <div class="landing-feature-card">
 
@@ -374,13 +459,15 @@
                     </h3>
 
                     <p>
-                        Quickly search your applications and
-                        filter them by their current status.
+                        Find applications quickly and filter
+                        your opportunities by their current status.
                     </p>
 
                 </div>
 
 
+
+                <!-- FEATURE 3 -->
 
                 <div class="landing-feature-card">
 
@@ -394,12 +481,14 @@
 
                     <p>
                         See how long you've been waiting and know
-                        when an application may need a follow-up.
+                        when it may be time to make your next move.
                     </p>
 
                 </div>
 
 
+
+                <!-- FEATURE 4 -->
 
                 <div class="landing-feature-card">
 
@@ -412,8 +501,8 @@
                     </h3>
 
                     <p>
-                        Your account keeps your applications
-                        separate from everyone else's.
+                        Your applications stay connected to your
+                        private NextStride account.
                     </p>
 
                 </div>
@@ -426,25 +515,82 @@
 
 
 
-        <!-- =========================
-             FINAL CTA
-        ========================== -->
+        <!-- =================================================
+             BRAND MESSAGE
+        ================================================== -->
+
+        <section class="nextstride-brand-section">
+
+
+            <div class="nextstride-brand-mark">
+
+                <img
+                    src="{{ url_for('static', filename='nextstride-logo.png') }}"
+                    alt="NextStride"
+                >
+
+            </div>
+
+
+
+            <div class="nextstride-brand-copy">
+
+                <p>
+                    MORE THAN AN APPLICATION LIST
+                </p>
+
+
+                <h2>
+                    Stay organized.
+                    Keep moving.
+                </h2>
+
+
+                <div class="nextstride-brand-tagline">
+                    Your career. Your next move.
+                </div>
+
+
+                <p class="nextstride-brand-description">
+
+                    Every application is another step forward.
+                    NextStride helps you see where you've been,
+                    where you stand, and what comes next.
+
+                </p>
+
+
+            </div>
+
+
+        </section>
+
+
+
+        <!-- =================================================
+             FINAL CALL TO ACTION
+        ================================================== -->
 
         <section class="landing-cta">
 
 
             <p>
-                READY TO GET ORGANIZED?
+                READY FOR YOUR NEXT MOVE?
             </p>
 
 
+
             <h2>
+
                 Your next opportunity could be
                 one application away.
+
             </h2>
 
 
+
             {% if session.get("user_id") %}
+
 
                 <a
                     href="{{ url_for('home') }}"
@@ -453,14 +599,17 @@
                     Go to Dashboard →
                 </a>
 
+
             {% else %}
+
 
                 <a
                     href="{{ url_for('signup') }}"
                     class="landing-primary-btn"
                 >
-                    Create Your Account →
+                    Create Your NextStride Account →
                 </a>
+
 
             {% endif %}
 
@@ -472,19 +621,30 @@
 
 
 
-    <!-- =========================
+    <!-- =================================================
          FOOTER
-    ========================== -->
+    ================================================== -->
 
     <footer class="landing-footer">
 
-        <span>
-            JobTracker
-        </span>
+
+        <div class="nextstride-footer-brand">
+
+            <strong>
+                NextStride
+            </strong>
+
+            <span>
+                Your career. Your next move.
+            </span>
+
+        </div>
+
 
         <p>
-            Built to make the job search easier.
+            Built to keep your career moving forward.
         </p>
+
 
     </footer>
 
