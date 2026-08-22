@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+    <title>Job Tracker | Organize Your Job Search</title>
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1"
+    >
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='style.css') }}"
+    >
+
+</head>
+
+
+<body class="landing-body">
+
+
+    <!-- =========================
+         NAVIGATION
+    ========================== -->
+
+    <nav class="landing-nav">
+
+        <a
+            href="{{ url_for('landing') }}"
+            class="landing-logo"
+        >
+            JobTracker
+        </a>
+
+
+        <div class="landing-nav-actions">
+
+
+            {% if session.get("user_id") %}
+
+                <a
+                    href="{{ url_for('home') }}"
+                    class="landing-login-btn"
+                >
+                    Dashboard
+                </a>
+
+            {% else %}
+
+                <a
+                    href="{{ url_for('login') }}"
+                    class="landing-login-btn"
+                >
+                    Log In
+                </a>
+
+
+                <a
+                    href="{{ url_for('signup') }}"
+                    class="landing-signup-btn"
+                >
+                    Get Started
+                </a>
+
+            {% endif %}
+
+
+        </div>
+
+    </nav>
+
+
+
+    <!-- =========================
+         HERO SECTION
+    ========================== -->
+
+    <main class="landing-main">
+
+
+        <section class="landing-hero">
+
+
+            <div class="landing-badge">
+                YOUR JOB SEARCH, ORGANIZED
+            </div>
+
+
+            <h1 class="landing-title">
+
+                Stop losing track of
+
+                <span>
+                    job applications.
+                </span>
+
+            </h1>
+
+
+            <p class="landing-description">
+
+                Track every application, monitor your progress,
+                stay on top of follow-ups, and manage your entire
+                job search from one dashboard.
+
+            </p>
+
+
+
+            <div class="landing-hero-buttons">
+
+
+                {% if session.get("user_id") %}
+
+                    <a
+                        href="{{ url_for('home') }}"
+                        class="landing-primary-btn"
+                    >
+                        Open Dashboard →
+                    </a>
+
+                {% else %}
+
+                    <a
+                        href="{{ url_for('signup') }}"
+                        class="landing-primary-btn"
+                    >
+                        Start Tracking →
+                    </a>
+
+
+                    <a
+                        href="{{ url_for('login') }}"
+                        class="landing-secondary-btn"
+                    >
+                        I Already Have an Account
+                    </a>
+
+                {% endif %}
+
+
+            </div>
+
+
+            <p class="landing-small-text">
+                Create an account and start tracking in seconds.
+            </p>
+
+
+        </section>
+
+
+
+        <!-- =========================
+             DASHBOARD PREVIEW
+        ========================== -->
+
+        <section class="landing-preview">
+
+
+            <div class="preview-window">
+
+
+                <div class="preview-window-top">
+
+                    <span></span>
+                    <span></span>
+                    <span></span>
+
+                </div>
+
+
+
+                <div class="preview-content">
+
+
+                    <div class="preview-heading">
+
+                        <div>
+
+                            <p>
+                                DASHBOARD
+                            </p>
+
+                            <h2>
+                                Your Job Search
+                            </h2>
+
+                        </div>
+
+
+                        <div class="preview-add-button">
+                            + Add Application
+                        </div>
+
+                    </div>
+
+
+
+                    <div class="preview-stats">
+
+
+                        <div class="preview-stat">
+
+                            <span>
+                                TOTAL
+                            </span>
+
+                            <strong>
+                                12
+                            </strong>
+
+                        </div>
+
+
+                        <div class="preview-stat">
+
+                            <span>
+                                APPLIED
+                            </span>
+
+                            <strong>
+                                7
+                            </strong>
+
+                        </div>
+
+
+                        <div class="preview-stat">
+
+                            <span>
+                                INTERVIEWS
+                            </span>
+
+                            <strong>
+                                3
+                            </strong>
+
+                        </div>
+
+
+                        <div class="preview-stat">
+
+                            <span>
+                                OFFERS
+                            </span>
+
+                            <strong>
+                                2
+                            </strong>
+
+                        </div>
+
+
+                    </div>
+
+
+
+                    <div class="preview-table">
+
+
+                        <div class="preview-row preview-table-header">
+
+                            <span>Company</span>
+                            <span>Position</span>
+                            <span>Status</span>
+
+                        </div>
+
+
+                        <div class="preview-row">
+
+                            <span>Northstar</span>
+                            <span>Frontend Developer</span>
+
+                            <span class="preview-status preview-interview">
+                                Interview
+                            </span>
+
+                        </div>
+
+
+                        <div class="preview-row">
+
+                            <span>Vertex Labs</span>
+                            <span>Software Engineer</span>
+
+                            <span class="preview-status preview-applied">
+                                Applied
+                            </span>
+
+                        </div>
+
+
+                        <div class="preview-row">
+
+                            <span>BrightWorks</span>
+                            <span>Web Developer</span>
+
+                            <span class="preview-status preview-offer">
+                                Offered
+                            </span>
+
+                        </div>
+
+
+                    </div>
+
+
+                </div>
+
+
+            </div>
+
+
+        </section>
+
+
+
+        <!-- =========================
+             FEATURES
+        ========================== -->
+
+        <section class="landing-features">
+
+
+            <div class="landing-section-heading">
+
+                <p>
+                    BUILT FOR THE JOB SEARCH
+                </p>
+
+                <h2>
+                    Everything in one place.
+                </h2>
+
+            </div>
+
+
+
+            <div class="landing-feature-grid">
+
+
+                <div class="landing-feature-card">
+
+                    <div class="feature-icon">
+                        ✓
+                    </div>
+
+                    <h3>
+                        Track Applications
+                    </h3>
+
+                    <p>
+                        Keep company names, positions, statuses
+                        and application dates organized.
+                    </p>
+
+                </div>
+
+
+
+                <div class="landing-feature-card">
+
+                    <div class="feature-icon">
+                        ↕
+                    </div>
+
+                    <h3>
+                        Search & Filter
+                    </h3>
+
+                    <p>
+                        Quickly search your applications and
+                        filter them by their current status.
+                    </p>
+
+                </div>
+
+
+
+                <div class="landing-feature-card">
+
+                    <div class="feature-icon">
+                        ⏱
+                    </div>
+
+                    <h3>
+                        Follow-Up Tracking
+                    </h3>
+
+                    <p>
+                        See how long you've been waiting and know
+                        when an application may need a follow-up.
+                    </p>
+
+                </div>
+
+
+
+                <div class="landing-feature-card">
+
+                    <div class="feature-icon">
+                        ◉
+                    </div>
+
+                    <h3>
+                        Private Dashboard
+                    </h3>
+
+                    <p>
+                        Your account keeps your applications
+                        separate from everyone else's.
+                    </p>
+
+                </div>
+
+
+            </div>
+
+
+        </section>
+
+
+
+        <!-- =========================
+             FINAL CTA
+        ========================== -->
+
+        <section class="landing-cta">
+
+
+            <p>
+                READY TO GET ORGANIZED?
+            </p>
+
+
+            <h2>
+                Your next opportunity could be
+                one application away.
+            </h2>
+
+
+            {% if session.get("user_id") %}
+
+                <a
+                    href="{{ url_for('home') }}"
+                    class="landing-primary-btn"
+                >
+                    Go to Dashboard →
+                </a>
+
+            {% else %}
+
+                <a
+                    href="{{ url_for('signup') }}"
+                    class="landing-primary-btn"
+                >
+                    Create Your Account →
+                </a>
+
+            {% endif %}
+
+
+        </section>
+
+
+    </main>
+
+
+
+    <!-- =========================
+         FOOTER
+    ========================== -->
+
+    <footer class="landing-footer">
+
+        <span>
+            JobTracker
+        </span>
+
+        <p>
+            Built to make the job search easier.
+        </p>
+
+    </footer>
+
+
+</body>
+
+</html>
