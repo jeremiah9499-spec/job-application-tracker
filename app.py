@@ -75,9 +75,6 @@ def init_db():
     """)
 
 
-    # Handles users table created before
-    # phone numbers were added.
-
     cursor.execute("""
         ALTER TABLE users
         ADD COLUMN IF NOT EXISTS phone_number TEXT
@@ -95,12 +92,14 @@ def init_db():
             job_title TEXT NOT NULL,
             status TEXT NOT NULL,
             date_applied DATE NOT NULL,
-            user_id INTEGER REFERENCES users(id) ON DELETE CASCADE
+            user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+            last_follow_up DATE,
+            follow_up_count INTEGER NOT NULL DEFAULT 0
         )
     """)
 
 
-    # Handles applications table created
+    # Handles older databases created
     # before user accounts were added.
 
     cursor.execute("""
@@ -108,6 +107,28 @@ def init_db():
         ADD COLUMN IF NOT EXISTS user_id
         INTEGER REFERENCES users(id)
         ON DELETE CASCADE
+    """)
+
+
+    # -------------------------
+    # FOLLOW-UP SYSTEM MIGRATION
+    # -------------------------
+    #
+    # These commands safely upgrade an
+    # existing NextStride database.
+    #
+    # They DO NOT delete existing applications.
+
+    cursor.execute("""
+        ALTER TABLE applications
+        ADD COLUMN IF NOT EXISTS last_follow_up DATE
+    """)
+
+
+    cursor.execute("""
+        ALTER TABLE applications
+        ADD COLUMN IF NOT EXISTS follow_up_count
+        INTEGER NOT NULL DEFAULT 0
     """)
 
 
@@ -151,12 +172,6 @@ def login_required(view_function):
 
 def valid_phone_number(phone_number):
 
-    # Basic E.164 format:
-    # +14045551234
-    #
-    # Must begin with +
-    # followed by country code + number.
-
     pattern = r"^\+[1-9]\d{7,14}$"
 
     return bool(
@@ -193,20 +208,6 @@ def send_sms_reminder(
     )
 
 
-    # -------------------------
-    # TWILIO TRIAL MODE
-    # -------------------------
-    #
-    # Your current Twilio trial account only
-    # allows predefined SMS templates.
-    #
-    # Later, after upgrading Twilio, set:
-    #
-    # TWILIO_TRIAL_MODE=false
-    #
-    # in Render and the personalized message
-    # below will automatically be used.
-
     trial_mode = os.environ.get(
         "TWILIO_TRIAL_MODE",
         "true"
@@ -222,7 +223,7 @@ def send_sms_reminder(
     else:
 
         message_body = (
-            f"JobTracker Reminder: "
+            f"NextStride Reminder: "
             f"You applied to {company_name} "
             f"for {job_title} "
             f"{days_waiting} days ago. "
@@ -294,10 +295,6 @@ def signup():
             "confirm_password"
         ]
 
-
-        # -------------------------
-        # VALIDATION
-        # -------------------------
 
         if not email:
 
@@ -573,8 +570,6 @@ def settings():
         )
 
 
-        # Allow user to remove their number.
-
         if phone_number:
 
             if not valid_phone_number(
@@ -671,10 +666,6 @@ def home():
     cursor = connection.cursor()
 
 
-    # -------------------------
-    # USER APPLICATIONS
-    # -------------------------
-
     cursor.execute(
         """
         SELECT
@@ -697,10 +688,6 @@ def home():
     applications = cursor.fetchall()
 
 
-    # -------------------------
-    # TOTAL
-    # -------------------------
-
     cursor.execute(
         """
         SELECT COUNT(*)
@@ -712,10 +699,6 @@ def home():
 
     total = cursor.fetchone()[0]
 
-
-    # -------------------------
-    # APPLIED
-    # -------------------------
 
     cursor.execute(
         """
@@ -735,10 +718,6 @@ def home():
     applied = cursor.fetchone()[0]
 
 
-    # -------------------------
-    # INTERVIEWS
-    # -------------------------
-
     cursor.execute(
         """
         SELECT COUNT(*)
@@ -756,10 +735,6 @@ def home():
 
     interviews = cursor.fetchone()[0]
 
-
-    # -------------------------
-    # OFFERS
-    # -------------------------
 
     cursor.execute(
         """
@@ -782,10 +757,6 @@ def home():
     cursor.close()
     connection.close()
 
-
-    # -------------------------
-    # DAYS WAITING
-    # -------------------------
 
     applications_with_days = []
 
@@ -825,6 +796,232 @@ def home():
         applied=applied,
         interviews=interviews,
         offers=offers
+    )
+
+
+# =================================================
+# FOLLOW-UP PAGE
+# =================================================
+
+@app.route("/follow-ups")
+@login_required
+def follow_ups():
+
+    user_id = session[
+        "user_id"
+    ]
+
+
+    connection = get_db_connection()
+    cursor = connection.cursor()
+
+
+    # We retrieve Applied applications.
+    # Python will decide which ones currently
+    # need attention based on application date
+    # and the last follow-up date.
+
+    cursor.execute(
+        """
+        SELECT
+            id,
+            company_name,
+            job_title,
+            status,
+            date_applied,
+            last_follow_up,
+            follow_up_count
+
+        FROM applications
+
+        WHERE user_id = %s
+        AND status = %s
+
+        ORDER BY date_applied ASC
+        """,
+        (
+            user_id,
+            "Applied"
+        )
+    )
+
+
+    applications = cursor.fetchall()
+
+
+    cursor.close()
+    connection.close()
+
+
+    follow_up_applications = []
+
+
+    for application in applications:
+
+        date_applied = application[4]
+        last_follow_up = application[5]
+
+
+        if isinstance(
+            date_applied,
+            str
+        ):
+
+            date_applied = datetime.strptime(
+                date_applied,
+                "%Y-%m-%d"
+            ).date()
+
+
+        if (
+            last_follow_up
+            and isinstance(
+                last_follow_up,
+                str
+            )
+        ):
+
+            last_follow_up = datetime.strptime(
+                last_follow_up,
+                "%Y-%m-%d"
+            ).date()
+
+
+        days_waiting = (
+            date.today()
+            - date_applied
+        ).days
+
+
+        # If the user has never followed up,
+        # show the application after 7 days.
+        #
+        # If they HAVE followed up,
+        # wait another 7 days before surfacing
+        # the application again.
+
+        if last_follow_up:
+
+            days_since_follow_up = (
+                date.today()
+                - last_follow_up
+            ).days
+
+        else:
+
+            days_since_follow_up = None
+
+
+        needs_follow_up = (
+            (
+                last_follow_up is None
+                and days_waiting > 7
+            )
+            or
+            (
+                last_follow_up is not None
+                and days_since_follow_up > 7
+            )
+        )
+
+
+        if needs_follow_up:
+
+            follow_up_applications.append(
+                {
+                    "id": application[0],
+                    "company_name": application[1],
+                    "job_title": application[2],
+                    "status": application[3],
+                    "date_applied": date_applied,
+                    "last_follow_up": last_follow_up,
+                    "follow_up_count": application[6],
+                    "days_waiting": days_waiting,
+                    "days_since_follow_up": (
+                        days_since_follow_up
+                    )
+                }
+            )
+
+
+    return render_template(
+        "follow_ups.html",
+        applications=follow_up_applications
+    )
+
+
+# =================================================
+# MARK APPLICATION FOLLOWED UP
+# =================================================
+
+@app.route(
+    "/follow-up/<int:id>",
+    methods=["POST"]
+)
+@login_required
+def mark_followed_up(id):
+
+    user_id = session[
+        "user_id"
+    ]
+
+
+    connection = get_db_connection()
+    cursor = connection.cursor()
+
+
+    # The user_id check is important.
+    # It prevents one account from updating
+    # another account's application.
+
+    cursor.execute(
+        """
+        UPDATE applications
+
+        SET last_follow_up = CURRENT_DATE,
+            follow_up_count = follow_up_count + 1
+
+        WHERE id = %s
+        AND user_id = %s
+
+        RETURNING id
+        """,
+        (
+            id,
+            user_id
+        )
+    )
+
+
+    updated_application = cursor.fetchone()
+
+
+    connection.commit()
+
+    cursor.close()
+    connection.close()
+
+
+    if not updated_application:
+
+        flash(
+            "Application could not be found.",
+            "error"
+        )
+
+        return redirect(
+            url_for("follow_ups")
+        )
+
+
+    flash(
+        "Follow-up marked complete!",
+        "success"
+    )
+
+
+    return redirect(
+        url_for("follow_ups")
     )
 
 
@@ -1109,9 +1306,6 @@ def remind_job(id):
     cursor = connection.cursor()
 
 
-    # Get application
-    # AND the logged-in user's phone number.
-
     cursor.execute(
         """
         SELECT
@@ -1220,6 +1414,23 @@ def remind_job(id):
         flash(
             "SMS reminder could not be sent. If you are using a Twilio trial account, the destination number may need to be verified.",
             "error"
+        )
+
+
+    # If reminder came from Follow Ups,
+    # return the user there.
+    #
+    # Otherwise return to dashboard.
+
+    next_page = request.args.get(
+        "next"
+    )
+
+
+    if next_page == "follow_ups":
+
+        return redirect(
+            url_for("follow_ups")
         )
 
 

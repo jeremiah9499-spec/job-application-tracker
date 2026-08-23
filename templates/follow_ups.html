@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+    <title>Follow Ups | NextStride</title>
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1"
+    >
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='style.css') }}"
+    >
+
+    <link
+        rel="icon"
+        type="image/png"
+        href="{{ url_for('static', filename='nextstride-icon.png') }}"
+    >
+
+</head>
+
+
+<body class="dashboard-body">
+
+
+    <div class="dashboard-layout">
+
+
+        <!-- =================================================
+             SIDEBAR
+        ================================================== -->
+
+        <aside
+            class="sidebar"
+            id="sidebar"
+        >
+
+
+            <div class="sidebar-brand">
+
+                <a
+                    href="{{ url_for('landing') }}"
+                    class="sidebar-logo"
+                    aria-label="NextStride home"
+                >
+
+                    <img
+                        src="{{ url_for('static', filename='nextstride-logo.png') }}"
+                        alt="NextStride"
+                    >
+
+                </a>
+
+            </div>
+
+
+            <nav class="sidebar-nav">
+
+
+                <a
+                    href="{{ url_for('home') }}"
+                    class="sidebar-link"
+                >
+
+                    <span class="sidebar-icon">
+                        ▣
+                    </span>
+
+                    <span>
+                        Dashboard
+                    </span>
+
+                </a>
+
+
+                <a
+                    href="{{ url_for('home') }}#applications"
+                    class="sidebar-link"
+                >
+
+                    <span class="sidebar-icon">
+                        ◫
+                    </span>
+
+                    <span>
+                        Applications
+                    </span>
+
+                </a>
+
+
+                <a
+                    href="{{ url_for('follow_ups') }}"
+                    class="sidebar-link active"
+                >
+
+                    <span class="sidebar-icon">
+                        ◷
+                    </span>
+
+                    <span>
+                        Follow Ups
+                    </span>
+
+                </a>
+
+
+            </nav>
+
+
+            <div class="sidebar-bottom">
+
+
+                <div class="sidebar-user">
+
+                    <span class="sidebar-user-label">
+                        SIGNED IN AS
+                    </span>
+
+                    <span class="sidebar-user-email">
+                        {{ session["user_email"] }}
+                    </span>
+
+                </div>
+
+
+                <a
+                    href="{{ url_for('settings') }}"
+                    class="sidebar-link"
+                >
+
+                    <span class="sidebar-icon">
+                        ⚙
+                    </span>
+
+                    <span>
+                        Account Settings
+                    </span>
+
+                </a>
+
+
+                <a
+                    href="{{ url_for('logout') }}"
+                    class="sidebar-link sidebar-logout"
+                >
+
+                    <span class="sidebar-icon">
+                        ↪
+                    </span>
+
+                    <span>
+                        Log Out
+                    </span>
+
+                </a>
+
+
+            </div>
+
+
+        </aside>
+
+
+        <!-- =================================================
+             MOBILE HEADER
+        ================================================== -->
+
+        <header class="mobile-dashboard-header">
+
+
+            <button
+                class="sidebar-toggle"
+                id="sidebarToggle"
+                type="button"
+                aria-label="Open navigation menu"
+            >
+                ☰
+            </button>
+
+
+            <a
+                href="{{ url_for('landing') }}"
+                class="mobile-dashboard-logo"
+            >
+
+                <img
+                    src="{{ url_for('static', filename='nextstride-logo.png') }}"
+                    alt="NextStride"
+                >
+
+            </a>
+
+
+        </header>
+
+
+        <!-- =================================================
+             MAIN CONTENT
+        ================================================== -->
+
+        <main class="dashboard-content">
+
+
+            <!-- FLASH MESSAGES -->
+
+            {% with messages = get_flashed_messages(with_categories=true) %}
+
+                {% if messages %}
+
+                    <div class="flash-container">
+
+                        {% for category, message in messages %}
+
+                            <div class="flash-message flash-{{ category }}">
+                                {{ message }}
+                            </div>
+
+                        {% endfor %}
+
+                    </div>
+
+                {% endif %}
+
+            {% endwith %}
+
+
+            <!-- PAGE HEADER -->
+
+            <div class="dashboard-main-header">
+
+
+                <div>
+
+                    <p class="dashboard-eyebrow">
+                        STAY ON TOP OF YOUR SEARCH
+                    </p>
+
+                    <h1>
+                        Follow Ups
+                    </h1>
+
+                    <p class="subtitle">
+
+                        Keep track of applications
+                        that may need your attention.
+
+                    </p>
+
+                </div>
+
+
+                <a
+                    href="{{ url_for('add_job') }}"
+                    class="btn dashboard-add-btn"
+                >
+                    + Add Application
+                </a>
+
+
+            </div>
+
+
+            <!-- =================================================
+                 FOLLOW-UP CONTENT
+            ================================================== -->
+
+            {% if applications %}
+
+
+                <div class="follow-up-grid">
+
+
+                    {% for application in applications %}
+
+
+                        <div class="follow-up-card">
+
+
+                            <div class="follow-up-card-top">
+
+
+                                <div>
+
+                                    <p class="dashboard-eyebrow">
+                                        NEEDS ATTENTION
+                                    </p>
+
+                                    <h2>
+                                        {{ application.company_name }}
+                                    </h2>
+
+                                    <p class="follow-up-job-title">
+                                        {{ application.job_title }}
+                                    </p>
+
+                                </div>
+
+
+                                <span class="status status-applied">
+                                    {{ application.status }}
+                                </span>
+
+
+                            </div>
+
+
+                            <div class="follow-up-details">
+
+
+                                <div class="follow-up-detail">
+
+                                    <span>
+                                        Applied
+                                    </span>
+
+                                    <strong>
+                                        {{ application.date_applied }}
+                                    </strong>
+
+                                </div>
+
+
+                                <div class="follow-up-detail">
+
+                                    <span>
+                                        Days Waiting
+                                    </span>
+
+                                    <strong>
+                                        {{ application.days_waiting }}
+                                    </strong>
+
+                                </div>
+
+
+                                <div class="follow-up-detail">
+
+                                    <span>
+                                        Follow Ups
+                                    </span>
+
+                                    <strong>
+                                        {{ application.follow_up_count }}
+                                    </strong>
+
+                                </div>
+
+
+                                <div class="follow-up-detail">
+
+                                    <span>
+                                        Last Follow Up
+                                    </span>
+
+                                    <strong>
+
+                                        {% if application.last_follow_up %}
+
+                                            {{ application.last_follow_up }}
+
+                                        {% else %}
+
+                                            Not yet
+
+                                        {% endif %}
+
+                                    </strong>
+
+                                </div>
+
+
+                            </div>
+
+
+                            {% if application.last_follow_up %}
+
+                                <p class="follow-up-history">
+
+                                    It has been
+
+                                    <strong>
+                                        {{ application.days_since_follow_up }}
+                                        days
+                                    </strong>
+
+                                    since your last follow-up.
+
+                                </p>
+
+                            {% else %}
+
+                                <p class="follow-up-history">
+
+                                    You haven't recorded a follow-up
+                                    for this application yet.
+
+                                </p>
+
+                            {% endif %}
+
+
+                            <div class="follow-up-actions">
+
+
+                                <a
+                                    href="{{ url_for(
+                                        'remind_job',
+                                        id=application.id,
+                                        next='follow_ups'
+                                    ) }}"
+                                    class="reminder-btn"
+                                    onclick="return confirm('Send yourself an SMS reminder for this application?')"
+                                >
+                                    📱 Send Reminder
+                                </a>
+
+
+                                <form
+                                    method="POST"
+                                    action="{{ url_for(
+                                        'mark_followed_up',
+                                        id=application.id
+                                    ) }}"
+                                >
+
+                                    <button
+                                        type="submit"
+                                        class="followed-up-btn"
+                                        onclick="return confirm('Mark this application as followed up today?')"
+                                    >
+                                        ✓ Mark Followed Up
+                                    </button>
+
+                                </form>
+
+
+                                <a
+                                    href="{{ url_for(
+                                        'edit_job',
+                                        id=application.id
+                                    ) }}"
+                                    class="btn edit-btn"
+                                >
+                                    Edit Application
+                                </a>
+
+
+                            </div>
+
+
+                        </div>
+
+
+                    {% endfor %}
+
+
+                </div>
+
+
+            {% else %}
+
+
+                <!-- EMPTY STATE -->
+
+                <div class="card follow-up-empty">
+
+
+                    <div class="follow-up-empty-icon">
+                        ✓
+                    </div>
+
+
+                    <h2>
+                        You're all caught up.
+                    </h2>
+
+
+                    <p>
+
+                        You don't currently have any
+                        applications that need a follow-up.
+
+                    </p>
+
+
+                    <a
+                        href="{{ url_for('home') }}"
+                        class="btn"
+                    >
+                        Back to Dashboard
+                    </a>
+
+
+                </div>
+
+
+            {% endif %}
+
+
+            <div class="dashboard-footer-message">
+
+                <strong>
+                    NextStride
+                </strong>
+
+                <span>
+                    Your career. Your next move.
+                </span>
+
+            </div>
+
+
+        </main>
+
+
+    </div>
+
+
+    <!-- MOBILE OVERLAY -->
+
+    <div
+        class="sidebar-overlay"
+        id="sidebarOverlay"
+    ></div>
+
+
+    <!-- =================================================
+         JAVASCRIPT
+    ================================================== -->
+
+    <script>
+
+        const sidebar =
+            document.getElementById("sidebar");
+
+        const sidebarToggle =
+            document.getElementById("sidebarToggle");
+
+        const sidebarOverlay =
+            document.getElementById("sidebarOverlay");
+
+
+        function openSidebar() {
+
+            sidebar.classList.add(
+                "sidebar-open"
+            );
+
+            sidebarOverlay.classList.add(
+                "sidebar-overlay-visible"
+            );
+
+        }
+
+
+        function closeSidebar() {
+
+            sidebar.classList.remove(
+                "sidebar-open"
+            );
+
+            sidebarOverlay.classList.remove(
+                "sidebar-overlay-visible"
+            );
+
+        }
+
+
+        sidebarToggle.addEventListener(
+            "click",
+            openSidebar
+        );
+
+
+        sidebarOverlay.addEventListener(
+            "click",
+            closeSidebar
+        );
+
+    </script>
+
+
+</body>
+
+</html>
