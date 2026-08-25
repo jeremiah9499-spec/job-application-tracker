@@ -44,11 +44,9 @@ def get_db_connection():
 
     database_url = os.environ["DATABASE_URL"]
 
-    connection = psycopg.connect(
+    return psycopg.connect(
         database_url
     )
-
-    return connection
 
 
 # =================================================
@@ -61,10 +59,7 @@ def init_db():
     cursor = connection.cursor()
 
 
-    # -------------------------
     # USERS TABLE
-    # -------------------------
-
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS users (
             id SERIAL PRIMARY KEY,
@@ -81,10 +76,7 @@ def init_db():
     """)
 
 
-    # -------------------------
     # APPLICATIONS TABLE
-    # -------------------------
-
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS applications (
             id SERIAL PRIMARY KEY,
@@ -99,9 +91,6 @@ def init_db():
     """)
 
 
-    # Handles older databases created
-    # before user accounts were added.
-
     cursor.execute("""
         ALTER TABLE applications
         ADD COLUMN IF NOT EXISTS user_id
@@ -110,15 +99,7 @@ def init_db():
     """)
 
 
-    # -------------------------
-    # FOLLOW-UP SYSTEM MIGRATION
-    # -------------------------
-    #
-    # These commands safely upgrade an
-    # existing NextStride database.
-    #
-    # They DO NOT delete existing applications.
-
+    # FOLLOW-UP FIELDS
     cursor.execute("""
         ALTER TABLE applications
         ADD COLUMN IF NOT EXISTS last_follow_up DATE
@@ -183,7 +164,74 @@ def valid_phone_number(phone_number):
 
 
 # =================================================
-# SMS REMINDER FUNCTION
+# DATE HELPER
+# =================================================
+
+def make_date(value):
+
+    if isinstance(
+        value,
+        str
+    ):
+
+        return datetime.strptime(
+            value,
+            "%Y-%m-%d"
+        ).date()
+
+    return value
+
+
+# =================================================
+# DOES APPLICATION NEED FOLLOW-UP?
+# =================================================
+
+def needs_follow_up(
+    date_applied,
+    last_follow_up
+):
+
+    date_applied = make_date(
+        date_applied
+    )
+
+    if last_follow_up:
+
+        last_follow_up = make_date(
+            last_follow_up
+        )
+
+
+    days_waiting = (
+        date.today()
+        - date_applied
+    ).days
+
+
+    if last_follow_up is None:
+
+        return (
+            days_waiting > 7,
+            days_waiting,
+            None
+        )
+
+
+    days_since_follow_up = (
+        date.today()
+        - last_follow_up
+    ).days
+
+
+    return (
+        days_since_follow_up > 7,
+        days_waiting,
+        days_since_follow_up
+    )
+
+
+# =================================================
+# SMS REMINDER
 # =================================================
 
 def send_sms_reminder(
@@ -246,12 +294,12 @@ def send_sms_reminder(
     return message.sid
 
 
-# Make sure database tables exist
+# Create/update database tables
 init_db()
 
 
 # =================================================
-# PUBLIC LANDING PAGE
+# LANDING PAGE
 # =================================================
 
 @app.route("/")
@@ -599,7 +647,6 @@ def settings():
                 phone_number
                 if phone_number
                 else None,
-
                 user_id
             )
         )
@@ -627,9 +674,7 @@ def settings():
         SELECT
             email,
             phone_number
-
         FROM users
-
         WHERE id = %s
         """,
         (user_id,)
@@ -666,6 +711,10 @@ def home():
     cursor = connection.cursor()
 
 
+    # -------------------------
+    # USER APPLICATIONS
+    # -------------------------
+
     cursor.execute(
         """
         SELECT
@@ -674,11 +723,8 @@ def home():
             job_title,
             status,
             date_applied
-
         FROM applications
-
         WHERE user_id = %s
-
         ORDER BY id DESC
         """,
         (user_id,)
@@ -687,6 +733,10 @@ def home():
 
     applications = cursor.fetchall()
 
+
+    # -------------------------
+    # TOTAL
+    # -------------------------
 
     cursor.execute(
         """
@@ -700,12 +750,14 @@ def home():
     total = cursor.fetchone()[0]
 
 
+    # -------------------------
+    # APPLIED
+    # -------------------------
+
     cursor.execute(
         """
         SELECT COUNT(*)
-
         FROM applications
-
         WHERE user_id = %s
         AND status = %s
         """,
@@ -718,12 +770,14 @@ def home():
     applied = cursor.fetchone()[0]
 
 
+    # -------------------------
+    # INTERVIEWS
+    # -------------------------
+
     cursor.execute(
         """
         SELECT COUNT(*)
-
         FROM applications
-
         WHERE user_id = %s
         AND status = %s
         """,
@@ -736,12 +790,14 @@ def home():
     interviews = cursor.fetchone()[0]
 
 
+    # -------------------------
+    # OFFERS
+    # -------------------------
+
     cursor.execute(
         """
         SELECT COUNT(*)
-
         FROM applications
-
         WHERE user_id = %s
         AND status = %s
         """,
@@ -753,13 +809,19 @@ def home():
 
     offers = cursor.fetchone()[0]
 
+
+    # -------------------------
+    # FOLLOW-UP CANDIDATES
+    # -------------------------
+
     cursor.execute(
         """
         SELECT
             id,
             company_name,
             job_title,
-            date_applied
+            date_applied,
+            last_follow_up
         FROM applications
         WHERE user_id = %s
         AND status = %s
@@ -769,63 +831,30 @@ def home():
             user_id,
             "Applied"
         )
-)
+    )
 
-follow_up_candidates = cursor.fetchall()
+
+    follow_up_candidates = (
+        cursor.fetchall()
+    )
+
 
     cursor.close()
     connection.close()
 
 
+    # -------------------------
+    # DAYS WAITING
+    # -------------------------
+
     applications_with_days = []
-
-follow_up_preview = []
-
-for application in follow_up_candidates:
-
-    follow_up_date_applied = application[3]
-
-    if isinstance(
-        follow_up_date_applied,
-        str
-    ):
-
-        follow_up_date_applied = datetime.strptime(
-            follow_up_date_applied,
-            "%Y-%m-%d"
-        ).date()
-
-    days_waiting = (
-        date.today()
-        - follow_up_date_applied
-    ).days
-
-    if days_waiting > 7:
-
-        follow_up_preview.append(
-            {
-                "id": application[0],
-                "company_name": application[1],
-                "job_title": application[2],
-                "days_waiting": days_waiting
-            }
-        )
 
 
     for application in applications:
 
-        date_applied = application[4]
-
-
-        if isinstance(
-            date_applied,
-            str
-        ):
-
-            date_applied = datetime.strptime(
-                date_applied,
-                "%Y-%m-%d"
-            ).date()
+        date_applied = make_date(
+            application[4]
+        )
 
 
         days_since = (
@@ -840,20 +869,51 @@ for application in follow_up_candidates:
         )
 
 
-   return render_template(
-    "index.html",
-    applications=applications_with_days,
-    total=total,
-    applied=applied,
-    interviews=interviews,
-    offers=offers,
-    follow_up_preview=follow_up_preview,
-    follow_up_count=len(follow_up_preview)
-)
+    # -------------------------
+    # DASHBOARD FOLLOW-UP PREVIEW
+    # -------------------------
+
+    follow_up_preview = []
+
+
+    for application in follow_up_candidates:
+
+        needs_attention, days_waiting, _ = (
+            needs_follow_up(
+                application[3],
+                application[4]
+            )
+        )
+
+
+        if needs_attention:
+
+            follow_up_preview.append(
+                {
+                    "id": application[0],
+                    "company_name": application[1],
+                    "job_title": application[2],
+                    "days_waiting": days_waiting
+                }
+            )
+
+
+    return render_template(
+        "index.html",
+        applications=applications_with_days,
+        total=total,
+        applied=applied,
+        interviews=interviews,
+        offers=offers,
+        follow_up_preview=follow_up_preview,
+        follow_up_count=len(
+            follow_up_preview
+        )
+    )
 
 
 # =================================================
-# FOLLOW-UP PAGE
+# FOLLOW UPS PAGE
 # =================================================
 
 @app.route("/follow-ups")
@@ -869,11 +929,6 @@ def follow_ups():
     cursor = connection.cursor()
 
 
-    # We retrieve Applied applications.
-    # Python will decide which ones currently
-    # need attention based on application date
-    # and the last follow-up date.
-
     cursor.execute(
         """
         SELECT
@@ -884,12 +939,9 @@ def follow_ups():
             date_applied,
             last_follow_up,
             follow_up_count
-
         FROM applications
-
         WHERE user_id = %s
         AND status = %s
-
         ORDER BY date_applied ASC
         """,
         (
@@ -911,74 +963,15 @@ def follow_ups():
 
     for application in applications:
 
-        date_applied = application[4]
-        last_follow_up = application[5]
-
-
-        if isinstance(
-            date_applied,
-            str
-        ):
-
-            date_applied = datetime.strptime(
-                date_applied,
-                "%Y-%m-%d"
-            ).date()
-
-
-        if (
-            last_follow_up
-            and isinstance(
-                last_follow_up,
-                str
-            )
-        ):
-
-            last_follow_up = datetime.strptime(
-                last_follow_up,
-                "%Y-%m-%d"
-            ).date()
-
-
-        days_waiting = (
-            date.today()
-            - date_applied
-        ).days
-
-
-        # If the user has never followed up,
-        # show the application after 7 days.
-        #
-        # If they HAVE followed up,
-        # wait another 7 days before surfacing
-        # the application again.
-
-        if last_follow_up:
-
-            days_since_follow_up = (
-                date.today()
-                - last_follow_up
-            ).days
-
-        else:
-
-            days_since_follow_up = None
-
-
-        needs_follow_up = (
-            (
-                last_follow_up is None
-                and days_waiting > 7
-            )
-            or
-            (
-                last_follow_up is not None
-                and days_since_follow_up > 7
+        needs_attention, days_waiting, days_since_follow_up = (
+            needs_follow_up(
+                application[4],
+                application[5]
             )
         )
 
 
-        if needs_follow_up:
+        if needs_attention:
 
             follow_up_applications.append(
                 {
@@ -986,8 +979,16 @@ def follow_ups():
                     "company_name": application[1],
                     "job_title": application[2],
                     "status": application[3],
-                    "date_applied": date_applied,
-                    "last_follow_up": last_follow_up,
+                    "date_applied": make_date(
+                        application[4]
+                    ),
+                    "last_follow_up": (
+                        make_date(
+                            application[5]
+                        )
+                        if application[5]
+                        else None
+                    ),
                     "follow_up_count": application[6],
                     "days_waiting": days_waiting,
                     "days_since_follow_up": (
@@ -1004,7 +1005,7 @@ def follow_ups():
 
 
 # =================================================
-# MARK APPLICATION FOLLOWED UP
+# MARK FOLLOWED UP
 # =================================================
 
 @app.route(
@@ -1023,20 +1024,13 @@ def mark_followed_up(id):
     cursor = connection.cursor()
 
 
-    # The user_id check is important.
-    # It prevents one account from updating
-    # another account's application.
-
     cursor.execute(
         """
         UPDATE applications
-
         SET last_follow_up = CURRENT_DATE,
             follow_up_count = follow_up_count + 1
-
         WHERE id = %s
         AND user_id = %s
-
         RETURNING id
         """,
         (
@@ -1046,7 +1040,9 @@ def mark_followed_up(id):
     )
 
 
-    updated_application = cursor.fetchone()
+    updated_application = (
+        cursor.fetchone()
+    )
 
 
     connection.commit()
@@ -1062,15 +1058,12 @@ def mark_followed_up(id):
             "error"
         )
 
-        return redirect(
-            url_for("follow_ups")
+    else:
+
+        flash(
+            "Follow-up marked complete!",
+            "success"
         )
-
-
-    flash(
-        "Follow-up marked complete!",
-        "success"
-    )
 
 
     return redirect(
@@ -1187,7 +1180,6 @@ def delete_job(id):
     cursor.execute(
         """
         DELETE FROM applications
-
         WHERE id = %s
         AND user_id = %s
         """,
@@ -1257,12 +1249,10 @@ def edit_job(id):
         cursor.execute(
             """
             UPDATE applications
-
             SET company_name = %s,
                 job_title = %s,
                 status = %s,
                 date_applied = %s
-
             WHERE id = %s
             AND user_id = %s
             """,
@@ -1302,9 +1292,7 @@ def edit_job(id):
             job_title,
             status,
             date_applied
-
         FROM applications
-
         WHERE id = %s
         AND user_id = %s
         """,
@@ -1368,12 +1356,9 @@ def remind_job(id):
             applications.status,
             applications.date_applied,
             users.phone_number
-
         FROM applications
-
         JOIN users
         ON users.id = applications.user_id
-
         WHERE applications.id = %s
         AND applications.user_id = %s
         """,
@@ -1420,18 +1405,10 @@ def remind_job(id):
 
     company_name = application[1]
     job_title = application[2]
-    date_applied = application[4]
 
-
-    if isinstance(
-        date_applied,
-        str
-    ):
-
-        date_applied = datetime.strptime(
-            date_applied,
-            "%Y-%m-%d"
-        ).date()
+    date_applied = make_date(
+        application[4]
+    )
 
 
     days_waiting = (
@@ -1469,11 +1446,6 @@ def remind_job(id):
             "error"
         )
 
-
-    # If reminder came from Follow Ups,
-    # return the user there.
-    #
-    # Otherwise return to dashboard.
 
     next_page = request.args.get(
         "next"
