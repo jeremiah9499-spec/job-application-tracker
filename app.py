@@ -753,12 +753,63 @@ def home():
 
     offers = cursor.fetchone()[0]
 
+    cursor.execute(
+        """
+        SELECT
+            id,
+            company_name,
+            job_title,
+            date_applied
+        FROM applications
+        WHERE user_id = %s
+        AND status = %s
+        ORDER BY date_applied ASC
+        """,
+        (
+            user_id,
+            "Applied"
+        )
+)
+
+follow_up_candidates = cursor.fetchall()
 
     cursor.close()
     connection.close()
 
 
     applications_with_days = []
+
+follow_up_preview = []
+
+for application in follow_up_candidates:
+
+    follow_up_date_applied = application[3]
+
+    if isinstance(
+        follow_up_date_applied,
+        str
+    ):
+
+        follow_up_date_applied = datetime.strptime(
+            follow_up_date_applied,
+            "%Y-%m-%d"
+        ).date()
+
+    days_waiting = (
+        date.today()
+        - follow_up_date_applied
+    ).days
+
+    if days_waiting > 7:
+
+        follow_up_preview.append(
+            {
+                "id": application[0],
+                "company_name": application[1],
+                "job_title": application[2],
+                "days_waiting": days_waiting
+            }
+        )
 
 
     for application in applications:
@@ -789,14 +840,16 @@ def home():
         )
 
 
-    return render_template(
-        "index.html",
-        applications=applications_with_days,
-        total=total,
-        applied=applied,
-        interviews=interviews,
-        offers=offers
-    )
+   return render_template(
+    "index.html",
+    applications=applications_with_days,
+    total=total,
+    applied=applied,
+    interviews=interviews,
+    offers=offers,
+    follow_up_preview=follow_up_preview,
+    follow_up_count=len(follow_up_preview)
+)
 
 
 # =================================================

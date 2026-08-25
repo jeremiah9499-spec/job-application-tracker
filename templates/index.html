@@ -596,36 +596,74 @@
                 id="follow-ups"
             >
 
-
                 <p class="dashboard-eyebrow">
                     STAY AHEAD
                 </p>
-
 
                 <h2>
                     Follow Ups
                 </h2>
 
+                {% if follow_up_count > 0 %}
 
-                <p class="follow-up-description">
+                    <p class="follow-up-description">
+                        {{ follow_up_count }}
+                        application{% if follow_up_count != 1 %}s{% endif %}
+                        may need your attention.
+                    </p>
 
-                    Applications that have been waiting
-                    more than 7 days will automatically
-                    display a follow-up reminder in your
-                    application list.
+                    <div class="dashboard-follow-up-list">
 
-                </p>
+                        {% for application in follow_up_preview[:3] %}
 
+                            <div class="dashboard-follow-up-item">
 
-                <a
-                    href="#applications"
-                    class="btn"
-                >
-                    View Applications
-                </a>
+                                <div>
 
+                                    <strong>
+                                        {{ application.company_name }}
+                                    </strong>
 
-            </section>
+                                    <span>
+                                        {{ application.job_title }}
+                                    </span>
+
+                                </div>
+
+                                <div class="dashboard-follow-up-days">
+                                    {{ application.days_waiting }} days
+                                </div>
+
+                            </div>
+
+                        {% endfor %}
+
+                    </div>
+
+                    <a
+                        href="{{ url_for('follow_ups') }}"
+                        class="btn"
+                    >
+                        View Follow Ups
+                    </a>
+
+                {% else %}
+
+                    <p class="follow-up-description">
+                        You're all caught up.
+                        No applications currently need follow-up attention.
+                    </p>
+
+                    <a
+                        href="{{ url_for('follow_ups') }}"
+                        class="btn"
+                    >
+                        Open Follow Ups
+                    </a>
+
+                {% endif %}
+
+        </section>
 
 
 
