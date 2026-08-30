@@ -1,0 +1,669 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+    <title>Applications | NextStride</title>
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1"
+    >
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='style.css') }}"
+    >
+
+    <link
+        rel="icon"
+        type="image/png"
+        href="{{ url_for('static', filename='nextstride-icon.png') }}"
+    >
+
+</head>
+
+
+<body class="dashboard-body">
+
+
+    <div class="dashboard-layout">
+
+
+        <!-- =================================================
+             SIDEBAR
+        ================================================== -->
+
+        <aside
+            class="sidebar"
+            id="sidebar"
+        >
+
+            <div class="sidebar-brand">
+
+                <a
+                    href="{{ url_for('landing') }}"
+                    class="sidebar-logo"
+                    aria-label="NextStride home"
+                >
+                    <img
+                        src="{{ url_for('static', filename='nextstride-logo.png') }}"
+                        alt="NextStride"
+                    >
+                </a>
+
+            </div>
+
+
+            <nav class="sidebar-nav">
+
+                <a
+                    href="{{ url_for('home') }}"
+                    class="sidebar-link"
+                >
+                    <span class="sidebar-icon">▣</span>
+                    <span>Dashboard</span>
+                </a>
+
+                <a
+                    href="{{ url_for('applications_page') }}"
+                    class="sidebar-link active"
+                >
+                    <span class="sidebar-icon">◫</span>
+                    <span>Applications</span>
+                </a>
+
+                <a
+                    href="{{ url_for('follow_ups') }}"
+                    class="sidebar-link"
+                >
+                    <span class="sidebar-icon">◷</span>
+                    <span>Follow Ups</span>
+                </a>
+
+            </nav>
+
+
+            <div class="sidebar-bottom">
+
+                <div class="sidebar-user">
+
+                    <span class="sidebar-user-label">
+                        SIGNED IN AS
+                    </span>
+
+                    <span class="sidebar-user-email">
+                        {{ session["user_email"] }}
+                    </span>
+
+                </div>
+
+
+                <a
+                    href="{{ url_for('settings') }}"
+                    class="sidebar-link"
+                >
+                    <span class="sidebar-icon">⚙</span>
+                    <span>Account Settings</span>
+                </a>
+
+
+                <a
+                    href="{{ url_for('logout') }}"
+                    class="sidebar-link sidebar-logout"
+                >
+                    <span class="sidebar-icon">↪</span>
+                    <span>Log Out</span>
+                </a>
+
+            </div>
+
+        </aside>
+
+
+        <!-- =================================================
+             MOBILE HEADER
+        ================================================== -->
+
+        <header class="mobile-dashboard-header">
+
+            <button
+                class="sidebar-toggle"
+                id="sidebarToggle"
+                type="button"
+                aria-label="Open navigation menu"
+            >
+                ☰
+            </button>
+
+            <a
+                href="{{ url_for('landing') }}"
+                class="mobile-dashboard-logo"
+            >
+                <img
+                    src="{{ url_for('static', filename='nextstride-logo.png') }}"
+                    alt="NextStride"
+                >
+            </a>
+
+        </header>
+
+
+        <!-- =================================================
+             MAIN CONTENT
+        ================================================== -->
+
+        <main class="dashboard-content">
+
+
+            <!-- FLASH MESSAGES -->
+
+            {% with messages = get_flashed_messages(with_categories=true) %}
+
+                {% if messages %}
+
+                    <div class="flash-container">
+
+                        {% for category, message in messages %}
+
+                            <div class="flash-message flash-{{ category }}">
+                                {{ message }}
+                            </div>
+
+                        {% endfor %}
+
+                    </div>
+
+                {% endif %}
+
+            {% endwith %}
+
+
+            <!-- =================================================
+                 PAGE HEADER
+            ================================================== -->
+
+            <div class="dashboard-main-header">
+
+                <div>
+
+                    <p class="dashboard-eyebrow">
+                        APPLICATION PIPELINE
+                    </p>
+
+                    <h1>
+                        Your Applications
+                    </h1>
+
+                    <p class="subtitle">
+                        Manage every opportunity in one place.
+                        Search your applications, track each status,
+                        and keep your job search moving forward.
+                    </p>
+
+                </div>
+
+
+                <a
+                    href="{{ url_for('add_job') }}"
+                    class="btn dashboard-add-btn"
+                >
+                    + Add Application
+                </a>
+
+            </div>
+
+
+            <!-- =================================================
+                 APPLICATIONS
+            ================================================== -->
+
+            <section class="card dashboard-section">
+
+                <div class="applications-heading">
+
+                    <div>
+
+                        <p class="dashboard-eyebrow">
+                            ALL APPLICATIONS
+                        </p>
+
+                        <h2>
+                            Application Tracker
+                        </h2>
+
+                    </div>
+
+                </div>
+
+
+                <!-- SEARCH / FILTER TOOLBAR -->
+
+                <div class="application-toolbar">
+
+                    <input
+                        type="text"
+                        id="searchInput"
+                        placeholder="Search by company or job title..."
+                    >
+
+                    <select id="statusFilter">
+
+                        <option value="all">
+                            All Statuses
+                        </option>
+
+                        <option value="applied">
+                            Applied
+                        </option>
+
+                        <option value="interview">
+                            Interview
+                        </option>
+
+                        <option value="offered">
+                            Offered
+                        </option>
+
+                        <option value="rejected">
+                            Rejected
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+                <!-- APPLICATION TABLE -->
+
+                <div class="applications-table-wrapper">
+
+                    <table id="applicationsTable">
+
+                        <thead>
+
+                            <tr>
+
+                                <th onclick="sortTable(0)">
+                                    Company ↕
+                                </th>
+
+                                <th onclick="sortTable(1)">
+                                    Job Title ↕
+                                </th>
+
+                                <th onclick="sortTable(2)">
+                                    Status ↕
+                                </th>
+
+                                <th onclick="sortTable(3)">
+                                    Date Applied ↕
+                                </th>
+
+                                <th onclick="sortTable(4)">
+                                    Days Waiting ↕
+                                </th>
+
+                                <th>
+                                    Actions
+                                </th>
+
+                            </tr>
+
+                        </thead>
+
+
+                        <tbody id="applicationsBody">
+
+                            {% for application in applications %}
+
+                                <tr>
+
+                                    <td>
+                                        {{ application[1] }}
+                                    </td>
+
+                                    <td>
+                                        {{ application[2] }}
+                                    </td>
+
+                                    <td>
+
+                                        <span
+                                            class="status status-{{ application[3]|lower }}"
+                                        >
+                                            {{ application[3] }}
+                                        </span>
+
+                                    </td>
+
+                                    <td>
+                                        {{ application[4] }}
+                                    </td>
+
+                                    <td>
+
+                                        {% if application[5] > 7 and application[3] == "Applied" %}
+
+                                            <span class="follow-up">
+                                                {{ application[5] }}
+                                                days — Follow Up
+                                            </span>
+
+                                            <br><br>
+
+                                            <a
+                                                href="{{ url_for('remind_job', id=application[0], next='applications') }}"
+                                                class="reminder-btn"
+                                                onclick="return confirm('Send yourself a follow-up SMS reminder for this application?')"
+                                            >
+                                                📱 Send Reminder
+                                            </a>
+
+                                        {% else %}
+
+                                            {{ application[5] }} days
+
+                                        {% endif %}
+
+                                    </td>
+
+                                    <td>
+
+                                        <a
+                                            href="{{ url_for('edit_job', id=application[0]) }}"
+                                            class="btn edit-btn"
+                                        >
+                                            Edit
+                                        </a>
+
+                                        <a
+                                            href="{{ url_for('delete_job', id=application[0]) }}"
+                                            class="btn delete-btn"
+                                            onclick="return confirm('Are you sure you want to delete this application?')"
+                                        >
+                                            Delete
+                                        </a>
+
+                                    </td>
+
+                                </tr>
+
+                            {% else %}
+
+                                <tr>
+
+                                    <td colspan="6">
+                                        No applications yet. Add your first application to get started.
+                                    </td>
+
+                                </tr>
+
+                            {% endfor %}
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+            </section>
+
+
+            <!-- =================================================
+                 FOOTER
+            ================================================== -->
+
+            <div class="dashboard-footer-message">
+
+                <strong>
+                    NextStride
+                </strong>
+
+                <span>
+                    Your career. Your next move.
+                </span>
+
+            </div>
+
+        </main>
+
+    </div>
+
+
+    <!-- MOBILE SIDEBAR OVERLAY -->
+
+    <div
+        class="sidebar-overlay"
+        id="sidebarOverlay"
+    ></div>
+
+
+    <!-- =================================================
+         JAVASCRIPT
+    ================================================== -->
+
+    <script>
+
+        /* SIDEBAR */
+
+        const sidebar =
+            document.getElementById("sidebar");
+
+        const sidebarToggle =
+            document.getElementById("sidebarToggle");
+
+        const sidebarOverlay =
+            document.getElementById("sidebarOverlay");
+
+
+        function openSidebar() {
+
+            sidebar.classList.add("sidebar-open");
+
+            sidebarOverlay.classList.add(
+                "sidebar-overlay-visible"
+            );
+
+        }
+
+
+        function closeSidebar() {
+
+            sidebar.classList.remove("sidebar-open");
+
+            sidebarOverlay.classList.remove(
+                "sidebar-overlay-visible"
+            );
+
+        }
+
+
+        sidebarToggle.addEventListener(
+            "click",
+            openSidebar
+        );
+
+
+        sidebarOverlay.addEventListener(
+            "click",
+            closeSidebar
+        );
+
+
+        /* SEARCH + FILTER */
+
+        const searchInput =
+            document.getElementById("searchInput");
+
+        const statusFilter =
+            document.getElementById("statusFilter");
+
+        const tableBody =
+            document.getElementById("applicationsBody");
+
+
+        function filterApplications() {
+
+            const searchText =
+                searchInput.value.toLowerCase();
+
+            const selectedStatus =
+                statusFilter.value.toLowerCase();
+
+            const rows =
+                tableBody.querySelectorAll("tr");
+
+
+            rows.forEach(function(row) {
+
+                const rowText =
+                    row.textContent.toLowerCase();
+
+                const statusElement =
+                    row.querySelector(".status");
+
+                let rowStatus = "";
+
+                if (statusElement) {
+
+                    rowStatus =
+                        statusElement
+                            .textContent
+                            .trim()
+                            .toLowerCase();
+
+                }
+
+                const matchesSearch =
+                    rowText.includes(searchText);
+
+                const matchesStatus =
+                    selectedStatus === "all"
+                    ||
+                    rowStatus === selectedStatus;
+
+
+                if (
+                    matchesSearch
+                    &&
+                    matchesStatus
+                ) {
+
+                    row.style.display = "";
+
+                } else {
+
+                    row.style.display = "none";
+
+                }
+
+            });
+
+        }
+
+
+        searchInput.addEventListener(
+            "keyup",
+            filterApplications
+        );
+
+
+        statusFilter.addEventListener(
+            "change",
+            filterApplications
+        );
+
+
+        /* TABLE SORTING */
+
+        let sortDirections = {};
+
+
+        function sortTable(columnIndex) {
+
+            const rows =
+                Array.from(
+                    tableBody.querySelectorAll(
+                        "tr"
+                    )
+                ).filter(function(row) {
+                    return row.querySelector(".status");
+                });
+
+
+            sortDirections[columnIndex] =
+                !sortDirections[columnIndex];
+
+
+            const ascending =
+                sortDirections[columnIndex];
+
+
+            rows.sort(function(rowA, rowB) {
+
+                const valueA =
+                    rowA.cells[columnIndex]
+                        .textContent
+                        .trim()
+                        .toLowerCase();
+
+                const valueB =
+                    rowB.cells[columnIndex]
+                        .textContent
+                        .trim()
+                        .toLowerCase();
+
+
+                if (columnIndex === 4) {
+
+                    const numberA =
+                        parseInt(valueA) || 0;
+
+                    const numberB =
+                        parseInt(valueB) || 0;
+
+                    return ascending
+                        ? numberA - numberB
+                        : numberB - numberA;
+
+                }
+
+
+                if (valueA < valueB) {
+
+                    return ascending
+                        ? -1
+                        : 1;
+
+                }
+
+
+                if (valueA > valueB) {
+
+                    return ascending
+                        ? 1
+                        : -1;
+
+                }
+
+
+                return 0;
+
+            });
+
+
+            rows.forEach(function(row) {
+
+                tableBody.appendChild(row);
+
+            });
+
+        }
+
+    </script>
+
+
+</body>
+
+</html>
