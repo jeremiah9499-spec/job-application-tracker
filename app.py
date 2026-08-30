@@ -913,6 +913,77 @@ def home():
 
 
 # =================================================
+# APPLICATIONS PAGE
+# =================================================
+
+@app.route("/applications")
+@login_required
+def applications_page():
+
+    user_id = session[
+        "user_id"
+    ]
+
+    connection = get_db_connection()
+    cursor = connection.cursor()
+
+    # -------------------------
+    # LOAD THIS USER'S
+    # APPLICATIONS
+    # -------------------------
+
+    cursor.execute(
+        """
+        SELECT
+            id,
+            company_name,
+            job_title,
+            status,
+            date_applied
+
+        FROM applications
+
+        WHERE user_id = %s
+
+        ORDER BY id DESC
+        """,
+        (user_id,)
+    )
+
+    applications = cursor.fetchall()
+
+    cursor.close()
+    connection.close()
+
+    # -------------------------
+    # CALCULATE DAYS WAITING
+    # -------------------------
+
+    applications_with_days = []
+
+    for application in applications:
+
+        date_applied = make_date(
+            application[4]
+        )
+
+        days_waiting = (
+            date.today()
+            - date_applied
+        ).days
+
+        applications_with_days.append(
+            application
+            + (days_waiting,)
+        )
+
+    return render_template(
+        "applications.html",
+        applications=applications_with_days
+    )
+
+
+# =================================================
 # FOLLOW UPS PAGE
 # =================================================
 
