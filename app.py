@@ -726,6 +726,7 @@ def home():
         FROM applications
         WHERE user_id = %s
         ORDER BY id DESC
+        LIMIT 5
         """,
         (user_id,)
     )
