@@ -1221,7 +1221,7 @@ def add_job():
 
 
         return redirect(
-            url_for("home")
+            url_for("applications_page")
         )
 
 
@@ -1275,7 +1275,7 @@ def delete_job(id):
 
 
     return redirect(
-        url_for("home")
+        url_for("applications_page")
     )
 
 
@@ -1352,7 +1352,7 @@ def edit_job(id):
 
 
         return redirect(
-            url_for("home")
+            url_for("applications_page")
         )
 
 
@@ -1390,7 +1390,7 @@ def edit_job(id):
         )
 
         return redirect(
-            url_for("home")
+            url_for("applications_page")
         )
 
 
@@ -1528,6 +1528,13 @@ def remind_job(id):
 
         return redirect(
             url_for("follow_ups")
+        )
+
+
+    if next_page == "applications":
+
+        return redirect(
+            url_for("applications_page")
         )
 
 
