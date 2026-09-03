@@ -1,254 +1,68 @@
 <!DOCTYPE html>
-
 <html>
-
 <head>
-
     <title>Account Settings | NextStride</title>
-
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1"
-    >
-
-    <link
-        rel="stylesheet"
-        href="{{ url_for('static', filename='style.css') }}"
-    >
-
-    <link
-        rel="icon"
-        type="image/png"
-        href="{{ url_for('static', filename='nextstride-icon.png') }}"
-    >
-
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='nextstride-icon.png') }}">
 </head>
-
-
 <body>
-
-
     <div class="form-page">
-
-
         <div class="form-card">
-
-
-            <!-- =========================
-                 CLICKABLE NEXTSTRIDE LOGO
-            ========================== -->
-
-            <a
-                href="{{ url_for('landing') }}"
-                class="auth-brand-logo"
-                aria-label="Return to NextStride home"
-            >
-
-                <img
-                    src="{{ url_for('static', filename='nextstride-logo.png') }}"
-                    alt="NextStride - Your career. Your next move."
-                >
-
+            <a href="{{ url_for('landing') }}" class="auth-brand-logo" aria-label="Return to NextStride home">
+                <img src="{{ url_for('static', filename='nextstride-logo.png') }}" alt="NextStride - Your career. Your next move.">
             </a>
 
-
-
-            <!-- =========================
-                 SETTINGS HEADER
-            ========================== -->
-
-            <h1>
-                Account Settings
-            </h1>
-
-
-            <p class="subtitle">
-                Manage your NextStride account and SMS reminder settings.
-            </p>
-
-
-
-            <!-- =========================
-                 FLASH MESSAGES
-            ========================== -->
+            <h1>Account Settings</h1>
+            <p class="subtitle">Manage your NextStride account and SMS reminder settings.</p>
 
             {% with messages = get_flashed_messages(with_categories=true) %}
-
                 {% if messages %}
-
                     <div class="flash-container">
-
                         {% for category, message in messages %}
-
-                            <div class="flash-message flash-{{ category }}">
-                                {{ message }}
-                            </div>
-
+                            <div class="flash-message flash-{{ category }}">{{ message }}</div>
                         {% endfor %}
-
                     </div>
-
                 {% endif %}
-
             {% endwith %}
 
-
-
-            <!-- =========================
-                 ACCOUNT EMAIL
-            ========================== -->
-
             <div class="settings-section">
-
-                <label>
-                    Account Email
-                </label>
-
-
-                <div class="settings-email">
-                    {{ user[0] }}
-                </div>
-
+                <label>Account Email</label>
+                <div class="settings-email">{{ user[0] }}</div>
             </div>
-
-
-
-            <!-- =========================
-                 PHONE NUMBER FORM
-            ========================== -->
 
             <form method="POST">
-
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
 
                 <div class="form-group">
-
-                    <label>
-                        SMS Phone Number
-                    </label>
-
-
-                    <input
-                        type="tel"
-                        name="phone_number"
-                        placeholder="+14045551234"
-                        value="{{ user[1] or '' }}"
-                        autocomplete="tel"
-                    >
-
-
+                    <label>SMS Phone Number</label>
+                    <input type="tel" name="phone_number" placeholder="+14045551234" value="{{ user[1] or '' }}" autocomplete="tel">
                     <p class="settings-help">
-
-                        Enter your phone number using international format.
-
-                        <br>
-
-                        Example:
-                        <strong>
-                            +14045551234
-                        </strong>
-
+                        Enter your phone number using international format.<br>
+                        Example: <strong>+14045551234</strong>
                     </p>
-
                 </div>
-
-
-
-                <!-- =========================
-                     ACTION BUTTONS
-                ========================== -->
 
                 <div class="form-actions">
-
-
-                    <a
-                        href="{{ url_for('home') }}"
-                        class="btn cancel-btn"
-                    >
-                        ← Back to Dashboard
-                    </a>
-
-
-                    <button
-                        type="submit"
-                        class="auth-submit-btn settings-save-btn"
-                    >
-                        Save Settings
-                    </button>
-
-
+                    <a href="{{ url_for('home') }}" class="btn cancel-btn">← Back to Dashboard</a>
+                    <button type="submit" class="auth-submit-btn settings-save-btn">Save Settings</button>
                 </div>
-
-
             </form>
 
-
-
-            <!-- =========================
-                 SMS INFORMATION
-            ========================== -->
-
             <div class="settings-note">
-
-
                 <div class="settings-note-heading">
-
-                    <span class="settings-note-icon">
-                        📱
-                    </span>
-
-
-                    <strong>
-                        SMS Reminders
-                    </strong>
-
+                    <span class="settings-note-icon">📱</span>
+                    <strong>SMS Reminders</strong>
                 </div>
-
-
-                <p>
-
-                    NextStride can send follow-up reminders
-                    to the phone number saved on your account.
-
-                </p>
-
-
-                <p>
-
-                    If NextStride is currently using a Twilio
-                    trial account, Twilio may require your
-                    phone number to be verified before messages
-                    can be delivered.
-
-                </p>
-
-
+                <p>NextStride can send follow-up reminders to the phone number saved on your account.</p>
+                <p>If NextStride is currently using a Twilio trial account, Twilio may require your phone number to be verified before messages can be delivered.</p>
             </div>
-
-
-
-            <!-- =========================
-                 NEXTSTRIDE TAGLINE
-            ========================== -->
 
             <div class="settings-brand-footer">
-
-                <strong>
-                    NextStride
-                </strong>
-
-                <span>
-                    Your career. Your next move.
-                </span>
-
+                <strong>NextStride</strong>
+                <span>Your career. Your next move.</span>
             </div>
-
-
         </div>
-
-
     </div>
-
-
 </body>
-
 </html>

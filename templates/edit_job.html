@@ -1,196 +1,60 @@
 <!DOCTYPE html>
-
 <html>
-
 <head>
-
     <title>Edit Application | NextStride</title>
-
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1"
-    >
-
-    <link
-        rel="stylesheet"
-        href="{{ url_for('static', filename='style.css') }}"
-    >
-
-     <link
-        rel="icon"
-        type="image/png"
-        href="{{ url_for('static', filename='nextstride-icon.png') }}"
-    >
-
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='nextstride-icon.png') }}">
 </head>
-
-
 <body>
-
     <div class="form-page">
-
         <div class="form-card">
-
-
-            <!-- CLICKABLE NEXTSTRIDE LOGO -->
-
-            <a
-                href="{{ url_for('landing') }}"
-                class="auth-brand-logo"
-                aria-label="Return to NextStride home"
-            >
-
-                <img
-                    src="{{ url_for('static', filename='nextstride-logo.png') }}"
-                    alt="NextStride - Your career. Your next move."
-                >
-
+            <a href="{{ url_for('landing') }}" class="auth-brand-logo" aria-label="Return to NextStride home">
+                <img src="{{ url_for('static', filename='nextstride-logo.png') }}" alt="NextStride - Your career. Your next move.">
             </a>
 
-
-            <h1>
-                Edit Application
-            </h1>
-
-            <p class="subtitle">
-                Update this opportunity and keep your NextStride progress current.
-            </p>
-
+            <h1>Edit Application</h1>
+            <p class="subtitle">Update this opportunity and keep your NextStride progress current.</p>
 
             <form method="POST">
-
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
 
                 <div class="form-group">
-
-                    <label>
-                        Company Name
-                    </label>
-
-                    <input
-                        type="text"
-                        name="company_name"
-                        value="{{ application[1] }}"
-                        required
-                    >
-
+                    <label>Company Name</label>
+                    <input type="text" name="company_name" value="{{ application[1] }}" required>
                 </div>
 
-
                 <div class="form-group">
-
-                    <label>
-                        Job Title
-                    </label>
-
-                    <input
-                        type="text"
-                        name="job_title"
-                        value="{{ application[2] }}"
-                        required
-                    >
-
+                    <label>Job Title</label>
+                    <input type="text" name="job_title" value="{{ application[2] }}" required>
                 </div>
 
-
                 <div class="form-group">
-
-                    <label>
-                        Status
-                    </label>
-
+                    <label>Status</label>
                     <select name="status">
-
-                        <option
-                            value="Applied"
-                            {% if application[3] == "Applied" %}selected{% endif %}
-                        >
-                            Applied
-                        </option>
-
-                        <option
-                            value="Interview"
-                            {% if application[3] == "Interview" %}selected{% endif %}
-                        >
-                            Interview
-                        </option>
-
-                        <option
-                            value="Offered"
-                            {% if application[3] == "Offered" %}selected{% endif %}
-                        >
-                            Offered
-                        </option>
-
-                        <option
-                            value="Rejected"
-                            {% if application[3] == "Rejected" %}selected{% endif %}
-                        >
-                            Rejected
-                        </option>
-
+                        <option value="Applied" {% if application[3] == "Applied" %}selected{% endif %}>Applied</option>
+                        <option value="Interview" {% if application[3] == "Interview" %}selected{% endif %}>Interview</option>
+                        <option value="Offered" {% if application[3] == "Offered" %}selected{% endif %}>Offered</option>
+                        <option value="Rejected" {% if application[3] == "Rejected" %}selected{% endif %}>Rejected</option>
                     </select>
-
                 </div>
-
 
                 <div class="form-group">
-
-                    <label>
-                        Date Applied
-                    </label>
-
-                    <input
-                        type="date"
-                        name="date_applied"
-                        value="{{ application[4] }}"
-                        required
-                    >
-
+                    <label>Date Applied</label>
+                    <input type="date" name="date_applied" value="{{ application[4] }}" required>
                 </div>
-
 
                 <div class="form-actions">
-
-
-                    <a
-                        href="{{ url_for('home') }}"
-                        class="btn cancel-btn"
-                    >
-                        ← Back to Dashboard
-                    </a>
-
-
-                    <button
-                        type="submit"
-                        class="auth-submit-btn form-save-btn"
-                    >
-                        Save Changes
-                    </button>
-
-
+                    <a href="{{ url_for('home') }}" class="btn cancel-btn">← Back to Dashboard</a>
+                    <button type="submit" class="auth-submit-btn form-save-btn">Save Changes</button>
                 </div>
-
-
             </form>
 
-
             <div class="form-brand-footer">
-
-                <strong>
-                    NextStride
-                </strong>
-
-                <span>
-                    Your career. Your next move.
-                </span>
-
+                <strong>NextStride</strong>
+                <span>Your career. Your next move.</span>
             </div>
-
-
         </div>
-
     </div>
-
 </body>
-
 </html>

@@ -5,7 +5,8 @@ from flask import (
     redirect,
     url_for,
     flash,
-    session
+    session,
+    abort
 )
 
 from datetime import datetime, date
@@ -21,6 +22,8 @@ from twilio.rest import Client
 import psycopg
 import os
 import re
+import hmac
+import secrets
 
 
 app = Flask(__name__)
@@ -34,6 +37,45 @@ app.secret_key = os.environ.get(
     "FLASK_SECRET_KEY",
     "development-secret-key"
 )
+
+
+# =================================================
+# CSRF PROTECTION
+# =================================================
+
+def csrf_token():
+
+    if "_csrf_token" not in session:
+
+        session["_csrf_token"] = secrets.token_urlsafe(32)
+
+    return session["_csrf_token"]
+
+
+app.jinja_env.globals["csrf_token"] = csrf_token
+
+
+@app.before_request
+def protect_against_csrf():
+
+    if request.method == "POST":
+
+        session_token = session.get("_csrf_token")
+        form_token = request.form.get("csrf_token")
+
+        if (
+            not session_token
+            or not form_token
+            or not hmac.compare_digest(
+                session_token,
+                form_token
+            )
+        ):
+
+            abort(
+                400,
+                description="Invalid or missing CSRF token."
+            )
 
 
 # =================================================
@@ -1235,7 +1277,8 @@ def add_job():
 # =================================================
 
 @app.route(
-    "/delete/<int:id>"
+    "/delete/<int:id>",
+    methods=["POST"]
 )
 @login_required
 def delete_job(id):
@@ -1405,7 +1448,8 @@ def edit_job(id):
 # =================================================
 
 @app.route(
-    "/remind/<int:id>"
+    "/remind/<int:id>",
+    methods=["POST"]
 )
 @login_required
 def remind_job(id):
@@ -1519,7 +1563,7 @@ def remind_job(id):
         )
 
 
-    next_page = request.args.get(
+    next_page = request.form.get(
         "next"
     )
 

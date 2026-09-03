@@ -1,195 +1,55 @@
 <!DOCTYPE html>
-
 <html>
-
 <head>
-
     <title>Create Account | NextStride</title>
-
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1"
-    >
-
-    <link
-        rel="stylesheet"
-        href="{{ url_for('static', filename='style.css') }}"
-    >
-
-    <link
-        rel="icon"
-        type="image/png"
-        href="{{ url_for('static', filename='nextstride-icon.png') }}"
-    >
-
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='nextstride-icon.png') }}">
 </head>
-
-
 <body>
-
     <div class="form-page">
-
         <div class="form-card">
-
-
-            <!-- =========================
-                 CLICKABLE NEXTSTRIDE LOGO
-            ========================== -->
-
-            <a
-                href="{{ url_for('landing') }}"
-                class="auth-brand-logo"
-                aria-label="Return to NextStride home"
-            >
-
-                <img
-                    src="{{ url_for('static', filename='nextstride-logo.png') }}"
-                    alt="NextStride - Your career. Your next move."
-                >
-
+            <a href="{{ url_for('landing') }}" class="auth-brand-logo" aria-label="Return to NextStride home">
+                <img src="{{ url_for('static', filename='nextstride-logo.png') }}" alt="NextStride - Your career. Your next move.">
             </a>
 
-
-            <!-- =========================
-                 SIGNUP HEADING
-            ========================== -->
-
-            <h1>
-                Create Your Account
-            </h1>
-
-            <p class="subtitle">
-                Start organizing your career journey with NextStride.
-            </p>
-
-
-            <!-- =========================
-                 FLASH MESSAGES
-            ========================== -->
+            <h1>Create Your Account</h1>
+            <p class="subtitle">Start organizing your career journey with NextStride.</p>
 
             {% with messages = get_flashed_messages(with_categories=true) %}
-
                 {% if messages %}
-
                     <div class="flash-container">
-
                         {% for category, message in messages %}
-
-                            <div class="flash-message flash-{{ category }}">
-                                {{ message }}
-                            </div>
-
+                            <div class="flash-message flash-{{ category }}">{{ message }}</div>
                         {% endfor %}
-
                     </div>
-
                 {% endif %}
-
             {% endwith %}
 
-
-            <!-- =========================
-                 CREATE ACCOUNT FORM
-            ========================== -->
-
             <form method="POST">
-
-
-                <div class="form-group">
-
-                    <label>
-                        Email
-                    </label>
-
-                    <input
-                        type="email"
-                        name="email"
-                        placeholder="you@example.com"
-                        required
-                        autocomplete="email"
-                    >
-
-                </div>
-
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
 
                 <div class="form-group">
-
-                    <label>
-                        Password
-                    </label>
-
-                    <input
-                        type="password"
-                        name="password"
-                        placeholder="Create a password"
-                        required
-                        minlength="8"
-                        autocomplete="new-password"
-                    >
-
+                    <label>Email</label>
+                    <input type="email" name="email" placeholder="you@example.com" required autocomplete="email">
                 </div>
-
 
                 <div class="form-group">
-
-                    <label>
-                        Confirm Password
-                    </label>
-
-                    <input
-                        type="password"
-                        name="confirm_password"
-                        placeholder="Confirm your password"
-                        required
-                        minlength="8"
-                        autocomplete="new-password"
-                    >
-
+                    <label>Password</label>
+                    <input type="password" name="password" placeholder="Create a password" required minlength="8" autocomplete="new-password">
                 </div>
 
+                <div class="form-group">
+                    <label>Confirm Password</label>
+                    <input type="password" name="confirm_password" placeholder="Confirm your password" required minlength="8" autocomplete="new-password">
+                </div>
 
-                <button
-                    type="submit"
-                    class="auth-submit-btn"
-                >
-                    Create Account →
-                </button>
-
-
+                <button type="submit" class="auth-submit-btn">Create Account →</button>
             </form>
 
-
-            <!-- =========================
-                 LOGIN LINK
-            ========================== -->
-
-            <p class="auth-switch">
-
-                Already have an account?
-
-                <a href="{{ url_for('login') }}">
-                    Log In
-                </a>
-
-            </p>
-
-
-            <!-- =========================
-                 BACK TO LANDING PAGE
-            ========================== -->
-
-            <a
-                href="{{ url_for('landing') }}"
-                class="auth-back-home"
-            >
-                ← Back to NextStride
-            </a>
-
-
+            <p class="auth-switch">Already have an account? <a href="{{ url_for('login') }}">Log In</a></p>
+            <a href="{{ url_for('landing') }}" class="auth-back-home">← Back to NextStride</a>
         </div>
-
     </div>
-
 </body>
-
 </html>

@@ -79,7 +79,7 @@
 
 
                 <a
-                    href="{{ url_for('home') }}#applications"
+                    href="{{ url_for('applications_page') }}"
                     class="sidebar-link"
                 >
 
@@ -408,17 +408,33 @@
                             <div class="follow-up-actions">
 
 
-                                <a
-                                    href="{{ url_for(
+                                <form
+                                    method="POST"
+                                    action="{{ url_for(
                                         'remind_job',
-                                        id=application.id,
-                                        next='follow_ups'
+                                        id=application.id
                                     ) }}"
-                                    class="reminder-btn"
-                                    onclick="return confirm('Send yourself an SMS reminder for this application?')"
+                                    onsubmit="return confirm('Send yourself an SMS reminder for this application?')"
                                 >
-                                    📱 Send Reminder
-                                </a>
+
+                                    <input
+                                        type="hidden"
+                                        name="csrf_token"
+                                        value="{{ csrf_token() }}"
+                                    >
+                                    <input
+                                        type="hidden"
+                                        name="next"
+                                        value="follow_ups"
+                                    >
+
+                                    <button
+                                        type="submit"
+                                        class="reminder-btn"
+                                    >
+                                        📱 Send Reminder
+                                    </button>
+                                </form>
 
 
                                 <form
@@ -428,6 +444,12 @@
                                         id=application.id
                                     ) }}"
                                 >
+
+                                    <input
+                                        type="hidden"
+                                        name="csrf_token"
+                                        value="{{ csrf_token() }}"
+                                    >
 
                                     <button
                                         type="submit"

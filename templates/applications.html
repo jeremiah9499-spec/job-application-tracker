@@ -352,13 +352,31 @@
 
                                             <br><br>
 
-                                            <a
-                                                href="{{ url_for('remind_job', id=application[0], next='applications') }}"
-                                                class="reminder-btn"
-                                                onclick="return confirm('Send yourself a follow-up SMS reminder for this application?')"
+                                            <form
+                                                method="POST"
+                                                action="{{ url_for('remind_job', id=application[0]) }}"
+                                                style="display: inline;"
+                                                onsubmit="return confirm('Send yourself a follow-up SMS reminder for this application?')"
                                             >
-                                                📱 Send Reminder
-                                            </a>
+
+                                    <input
+                                        type="hidden"
+                                        name="csrf_token"
+                                        value="{{ csrf_token() }}"
+                                    >
+                                                <input
+                                                    type="hidden"
+                                                    name="next"
+                                                    value="applications"
+                                                >
+
+                                                <button
+                                                    type="submit"
+                                                    class="reminder-btn"
+                                                >
+                                                    📱 Send Reminder
+                                                </button>
+                                            </form>
 
                                         {% else %}
 
@@ -377,13 +395,25 @@
                                             Edit
                                         </a>
 
-                                        <a
-                                            href="{{ url_for('delete_job', id=application[0]) }}"
-                                            class="btn delete-btn"
-                                            onclick="return confirm('Are you sure you want to delete this application?')"
+                                        <form
+                                            method="POST"
+                                            action="{{ url_for('delete_job', id=application[0]) }}"
+                                            style="display: inline;"
+                                            onsubmit="return confirm('Are you sure you want to delete this application?')"
                                         >
-                                            Delete
-                                        </a>
+
+                                    <input
+                                        type="hidden"
+                                        name="csrf_token"
+                                        value="{{ csrf_token() }}"
+                                    >
+                                            <button
+                                                type="submit"
+                                                class="btn delete-btn"
+                                            >
+                                                Delete
+                                            </button>
+                                        </form>
 
                                     </td>
 
