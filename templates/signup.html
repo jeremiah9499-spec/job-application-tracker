@@ -1,55 +1,440 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
+
 <head>
+    <meta charset="UTF-8">
+
     <title>Create Account | NextStride</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-    <link rel="icon" type="image/png" href="{{ url_for('static', filename='nextstride-icon.png') }}">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1"
+    >
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='style.css') }}"
+    >
+
+    <link
+        rel="icon"
+        type="image/png"
+        href="{{ url_for('static', filename='nextstride-icon.png') }}"
+    >
+
+    <style>
+        .password-feedback {
+            margin-top: 8px;
+            font-size: 0.85rem;
+            line-height: 1.4;
+        }
+
+        .password-strength-bar {
+            width: 100%;
+            height: 6px;
+            margin-top: 8px;
+            overflow: hidden;
+            background: #e5e7eb;
+            border-radius: 999px;
+        }
+
+        .password-strength-fill {
+            width: 0;
+            height: 100%;
+            background: #9ca3af;
+            transition:
+                width 0.25s ease,
+                background 0.25s ease;
+        }
+
+        .password-feedback.neutral {
+            color: #6b7280;
+        }
+
+        .password-feedback.weak {
+            color: #dc2626;
+        }
+
+        .password-feedback.medium {
+            color: #d97706;
+        }
+
+        .password-feedback.strong {
+            color: #059669;
+        }
+
+        .password-match-message {
+            margin-top: 8px;
+            font-size: 0.85rem;
+        }
+
+        .password-match-message.match {
+            color: #059669;
+        }
+
+        .password-match-message.no-match {
+            color: #dc2626;
+        }
+    </style>
 </head>
+
 <body>
+
     <div class="form-page">
+
         <div class="form-card">
-            <a href="{{ url_for('landing') }}" class="auth-brand-logo" aria-label="Return to NextStride home">
-                <img src="{{ url_for('static', filename='nextstride-logo.png') }}" alt="NextStride - Your career. Your next move.">
+
+            <a
+                href="{{ url_for('landing') }}"
+                class="auth-brand-logo"
+                aria-label="Return to NextStride home"
+            >
+                <img
+                    src="{{ url_for('static', filename='nextstride-logo.png') }}"
+                    alt="NextStride - Your career. Your next move."
+                >
             </a>
 
+
             <h1>Create Your Account</h1>
-            <p class="subtitle">Start organizing your career journey with NextStride.</p>
+
+            <p class="subtitle">
+                Start organizing your career journey with NextStride.
+            </p>
+
 
             {% with messages = get_flashed_messages(with_categories=true) %}
+
                 {% if messages %}
+
                     <div class="flash-container">
+
                         {% for category, message in messages %}
-                            <div class="flash-message flash-{{ category }}">{{ message }}</div>
+
+                            <div class="flash-message flash-{{ category }}">
+                                {{ message }}
+                            </div>
+
                         {% endfor %}
+
                     </div>
+
                 {% endif %}
+
             {% endwith %}
 
-            <form method="POST">
-                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+            <form
+                method="POST"
+                id="signupForm"
+            >
+
+                <input
+                    type="hidden"
+                    name="csrf_token"
+                    value="{{ csrf_token() }}"
+                >
+
+
+                <!-- EMAIL -->
 
                 <div class="form-group">
-                    <label>Email</label>
-                    <input type="email" name="email" placeholder="you@example.com" required autocomplete="email">
+
+                    <label for="email">
+                        Email
+                    </label>
+
+                    <input
+                        type="email"
+                        id="email"
+                        name="email"
+                        placeholder="you@example.com"
+                        required
+                        autocomplete="email"
+                    >
+
                 </div>
+
+
+                <!-- PASSWORD -->
 
                 <div class="form-group">
-                    <label>Password</label>
-                    <input type="password" name="password" placeholder="Create a password" required minlength="8" autocomplete="new-password">
+
+                    <label for="password">
+                        Password
+                    </label>
+
+                    <input
+                        type="password"
+                        id="password"
+                        name="password"
+                        placeholder="Create a password"
+                        required
+                        minlength="8"
+                        autocomplete="new-password"
+                    >
+
+                    <div class="password-strength-bar">
+
+                        <div
+                            class="password-strength-fill"
+                            id="passwordStrengthFill"
+                        ></div>
+
+                    </div>
+
+                    <p
+                        class="password-feedback neutral"
+                        id="passwordStrengthText"
+                    >
+                        Use at least 8 characters.
+                    </p>
+
                 </div>
+
+
+                <!-- CONFIRM PASSWORD -->
 
                 <div class="form-group">
-                    <label>Confirm Password</label>
-                    <input type="password" name="confirm_password" placeholder="Confirm your password" required minlength="8" autocomplete="new-password">
+
+                    <label for="confirmPassword">
+                        Confirm Password
+                    </label>
+
+                    <input
+                        type="password"
+                        id="confirmPassword"
+                        name="confirm_password"
+                        placeholder="Confirm your password"
+                        required
+                        minlength="8"
+                        autocomplete="new-password"
+                    >
+
+                    <p
+                        class="password-match-message"
+                        id="passwordMatchMessage"
+                    ></p>
+
                 </div>
 
-                <button type="submit" class="auth-submit-btn">Create Account →</button>
+
+                <button
+                    type="submit"
+                    class="auth-submit-btn"
+                >
+                    Create Account &rarr;
+                </button>
+
             </form>
 
-            <p class="auth-switch">Already have an account? <a href="{{ url_for('login') }}">Log In</a></p>
-            <a href="{{ url_for('landing') }}" class="auth-back-home">← Back to NextStride</a>
+
+            <p class="auth-switch">
+                Already have an account?
+
+                <a href="{{ url_for('login') }}">
+                    Log In
+                </a>
+            </p>
+
+
+            <a
+                href="{{ url_for('landing') }}"
+                class="auth-back-home"
+            >
+                &larr; Back to NextStride
+            </a>
+
         </div>
+
     </div>
+
+
+    <script>
+
+        const passwordInput =
+            document.getElementById("password");
+
+        const confirmPasswordInput =
+            document.getElementById("confirmPassword");
+
+        const strengthFill =
+            document.getElementById("passwordStrengthFill");
+
+        const strengthText =
+            document.getElementById("passwordStrengthText");
+
+        const matchMessage =
+            document.getElementById("passwordMatchMessage");
+
+
+        function calculatePasswordStrength(password) {
+
+            let score = 0;
+
+            if (password.length >= 8) {
+                score++;
+            }
+
+            if (password.length >= 12) {
+                score++;
+            }
+
+            if (/[A-Z]/.test(password)) {
+                score++;
+            }
+
+            if (/[a-z]/.test(password)) {
+                score++;
+            }
+
+            if (/[0-9]/.test(password)) {
+                score++;
+            }
+
+            if (/[^A-Za-z0-9]/.test(password)) {
+                score++;
+            }
+
+            return score;
+        }
+
+
+        function updatePasswordStrength() {
+
+            const password =
+                passwordInput.value;
+
+            const score =
+                calculatePasswordStrength(password);
+
+
+            if (password.length === 0) {
+
+                strengthFill.style.width = "0%";
+                strengthFill.style.background = "#9ca3af";
+
+                strengthText.textContent =
+                    "Use at least 8 characters.";
+
+                strengthText.className =
+                    "password-feedback neutral";
+
+                return;
+            }
+
+
+            if (score <= 2) {
+
+                strengthFill.style.width = "33%";
+                strengthFill.style.background = "#dc2626";
+
+                strengthText.textContent =
+                    "Password strength: Weak";
+
+                strengthText.className =
+                    "password-feedback weak";
+
+            }
+
+            else if (score <= 4) {
+
+                strengthFill.style.width = "66%";
+                strengthFill.style.background = "#d97706";
+
+                strengthText.textContent =
+                    "Password strength: Good";
+
+                strengthText.className =
+                    "password-feedback medium";
+
+            }
+
+            else {
+
+                strengthFill.style.width = "100%";
+                strengthFill.style.background = "#059669";
+
+                strengthText.textContent =
+                    "Password strength: Strong";
+
+                strengthText.className =
+                    "password-feedback strong";
+
+            }
+
+        }
+
+
+        function updatePasswordMatch() {
+
+            const password =
+                passwordInput.value;
+
+            const confirmation =
+                confirmPasswordInput.value;
+
+
+            if (confirmation.length === 0) {
+
+                matchMessage.textContent = "";
+
+                matchMessage.className =
+                    "password-match-message";
+
+                confirmPasswordInput.setCustomValidity("");
+
+                return;
+            }
+
+
+            if (password === confirmation) {
+
+                matchMessage.textContent =
+                    "Passwords match";
+
+                matchMessage.className =
+                    "password-match-message match";
+
+                confirmPasswordInput.setCustomValidity("");
+
+            }
+
+            else {
+
+                matchMessage.textContent =
+                    "Passwords do not match.";
+
+                matchMessage.className =
+                    "password-match-message no-match";
+
+                confirmPasswordInput.setCustomValidity(
+                    "Passwords must match."
+                );
+
+            }
+
+        }
+
+
+        passwordInput.addEventListener(
+            "input",
+            function () {
+
+                updatePasswordStrength();
+                updatePasswordMatch();
+
+            }
+        );
+
+
+        confirmPasswordInput.addEventListener(
+            "input",
+            updatePasswordMatch
+        );
+
+    </script>
+
 </body>
+
 </html>
