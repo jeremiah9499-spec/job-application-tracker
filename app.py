@@ -33,10 +33,7 @@ app = Flask(__name__)
 # FLASK SECRET KEY
 # =================================================
 
-app.secret_key = os.environ.get(
-    "FLASK_SECRET_KEY",
-    "development-secret-key"
-)
+app.secret_key = os.environ["FLASK_SECRET_KEY"]
 
 
 # =================================================
